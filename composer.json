@@ -1,0 +1,12 @@
+{
+    "name": "elendev/nexus-composer-push",
+    "description": "Provide a Push command to composer to push to Nexus repositories",
+    "type": "composer-plugin",
+    "authors": [
+        {
+            "name": "Jonas Renaudot",
+            "email": "jonas.renaudot@gmail.com"
+        }
+    ],
+    "require": {}
+}
