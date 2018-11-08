@@ -12,8 +12,6 @@ use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\StringInput;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class PushCommand extends BaseCommand
@@ -55,18 +53,11 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $fileName = tempnam(sys_get_temp_dir(), 'nexus-push');
+        $fileName = tempnam(sys_get_temp_dir(), 'nexus-push') . '.zip';
 
         try {
-            $this->getApplication()->find('archive')->run(
-                new StringInput(sprintf('--format=zip --dir=%s --file=%s %s',
-                    dirname($fileName),
-                    basename($fileName),
-                    $this->getIO()
-                        ->isVeryVerbose() ? '-vvv' : '--quiet') // add verbosity if required
-                ),
-              new NullOutput()
-            );
+            ZipArchiver::archiveDirectory(getcwd(), $fileName, ['vendor'],
+                $this->getIO());
 
             $url = $this->generateUrl(
               $input->getOption('url'),
@@ -78,7 +69,7 @@ EOT
               ->write('Execute the Nexus Push for the URL ' . $url . '...',
                 true);
 
-            $this->sendFile($url, $fileName . '.zip',
+            $this->sendFile($url, $fileName,
                 $input->getOption('username'),
               $input->getOption('password'));
 
@@ -90,7 +81,6 @@ EOT
                 ->write('Remove file ' . $fileName, true,
                     IOInterface::VERY_VERBOSE);
             unlink($fileName);
-            unlink($fileName . '.zip');
         }
     }
 
