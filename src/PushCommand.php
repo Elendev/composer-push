@@ -89,10 +89,8 @@ EOT
             $this->getIO()
                 ->write('Remove file ' . $fileName, true,
                     IOInterface::VERY_VERBOSE);
-            if (!unlink(realpath($fileName))) {
-                $this->getIO()
-                    ->writeError('Impossible to remove file ' . $fileName);
-            }
+            unlink($fileName);
+            unlink($fileName . '.zip');
         }
     }
 
