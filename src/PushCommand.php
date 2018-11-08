@@ -59,7 +59,12 @@ EOT
 
         try {
             $this->getApplication()->find('archive')->run(
-              new StringInput(sprintf('--format=zip --dir=%s --file=%s', dirname($fileName), basename($fileName))),
+                new StringInput(sprintf('--format=zip --dir=%s --file=%s %s',
+                    dirname($fileName),
+                    basename($fileName),
+                    $this->getIO()
+                        ->isVeryVerbose() ? '-vvv' : '--quiet') // add verbosity if required
+                ),
               new NullOutput()
             );
 
@@ -73,14 +78,21 @@ EOT
               ->write('Execute the Nexus Push for the URL ' . $url . '...',
                 true);
 
-            $this->sendFile($url, $fileName, $input->getOption('username'),
+            $this->sendFile($url, $fileName . '.zip',
+                $input->getOption('username'),
               $input->getOption('password'));
 
             $this->getIO()
               ->write('Archive correctly pushed to the Nexus server');
 
         } finally {
-            unlink($fileName);
+            $this->getIO()
+                ->write('Remove file ' . $fileName, true,
+                    IOInterface::VERY_VERBOSE);
+            if (!unlink(realpath($fileName))) {
+                $this->getIO()
+                    ->writeError('Impossible to remove file ' . $fileName);
+            }
         }
     }
 
@@ -99,8 +111,6 @@ EOT
             if (empty($url)) {
                 throw new InvalidArgumentException('The option --url is required or has to be provided as an extra argument in composer.json');
             }
-
-
         }
 
         if (empty($name)) {
@@ -110,6 +120,9 @@ EOT
         if (empty($version)) {
             throw new InvalidArgumentException('The version argument is required');
         }
+
+        // Remove trailing slash from URL
+        $url = preg_replace('{/$}', '', $url);
 
         return sprintf('%s/packages/upload/%s/%s', $url, $name, $version);
     }
@@ -126,6 +139,7 @@ EOT
      * @param string|null $username
      * @param string|null $password
      *
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function sendFile(
@@ -134,24 +148,17 @@ EOT
       $username = null,
       $password = null
     ) {
-
         if (!empty($username) && !empty($password)) {
-            $this->getClient()->request(
-              'POST',
-              $url,
-              [
-                'body' => fopen($filePath, 'r'),
-                'auth' => [$username, $password],
-              ]
-            );
+            $this->postFile($url, $filePath, $username, $password);
+            return;
         } else {
 
-            $credentials = ['none' => []];
+            $credentials = [];
 
             if ($this->getNexusExtra('username') !== null && $this->getNexusExtra('password')) {
                 $credentials['extra'] = [
-                  $this->getNexusExtra('username'),
-                  $this->getNexusExtra('password'),
+                    'username' => $this->getNexusExtra('username'),
+                    'password' => $this->getNexusExtra('password'),
                 ];
             }
 
@@ -160,12 +167,20 @@ EOT
                 $match) && $this->getIO()->hasAuthentication($match[1])) {
                 $auth = $this->getIO()->getAuthentication($match[1]);
                 $credentials['auth.json'] = [
-                  $auth['username'],
-                  $auth['password'],
+                    'username' => $auth['username'],
+                    'password' => $auth['password'],
                 ];
             }
 
+            // In the case anything else works, try to connect without any credentials.
+            $credentials['none'] = [];
+
             foreach ($credentials as $type => $credential) {
+
+                $this->getIO()
+                    ->write('[postFile] Trying credentials ' . $type,
+                        true, IOInterface::VERY_VERBOSE);
+
                 $options = [
                   'body' => fopen($filePath, 'r'),
                 ];
@@ -175,39 +190,67 @@ EOT
                 }
 
                 try {
-                    $this->getClient()->request(
-                      'POST',
-                      $url,
-                      $options
-                    );
-
-                    if ($type !== 'none') {
+                    if (empty($credential) || empty($credential['username']) || empty($credential['password'])) {
                         $this->getIO()
-                          ->write('Nexus authentication done with credentials ' . $type,
-                            true, IOInterface::VERY_VERBOSE);
+                            ->write('[postFile] Use no credentials',
+                                true, IOInterface::VERY_VERBOSE);
+                        $this->postFile($url, $filePath);
+                    } else {
+                        $this->getIO()
+                            ->write('[postFile] Use user ' . $credential['username'],
+                                true, IOInterface::VERY_VERBOSE);
+                        $this->postFile($url, $filePath,
+                            $credential['username'], $credential['password']);
                     }
 
                     return;
-
                 } catch (ClientException $e) {
                     if ($e->getResponse()->getStatusCode() === '401') {
                         if ($type === 'none') {
                             $this->getIO()
-                              ->write('Unable to push on server (authentication required)',
-                                true, IOInterface::VERY_VERBOSE);
+                                ->write('Unable to push on server (authentication required)',
+                                    true, IOInterface::VERY_VERBOSE);
                         } else {
                             $this->getIO()
-                              ->write('Unable to authenticate on server with credentials ' . $type,
-                                true, IOInterface::VERY_VERBOSE);
+                                ->write('Unable to authenticate on server with credentials ' . $type,
+                                    true, IOInterface::VERY_VERBOSE);
                         }
                     } else {
                         $this->getIO()
-                          ->writeError('A network error occured while trying to upload to nexus: ' . $e->getMessage(),
-                            true, IOInterface::QUIET);
+                            ->writeError('A network error occured while trying to upload to nexus: ' . $e->getMessage(),
+                                true, IOInterface::QUIET);
                     }
                 }
             }
         }
+
+        throw new \Exception('Impossible to push to remote repository, use -vvv to have more details');
+    }
+
+    /**
+     * The file has to be uploaded by hand because of composer limitations
+     * (impossible to use Guzzle functions.php file in a composer plugin).
+     *
+     * @param $url
+     * @param $file
+     * @param $username
+     * @param $password
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    private function postFile($url, $file, $username = null, $password = null)
+    {
+
+        $options = [
+            'body' => fopen($file, 'r'),
+            'debug' => $this->getIO()->isVeryVerbose(),
+        ];
+
+        if (!empty($username) && !empty($password)) {
+            $options['auth'] = [$username, $password];
+        }
+
+        $this->getClient()->request('PUT', $url, $options);
     }
 
     /**
@@ -216,6 +259,10 @@ EOT
     private function getClient()
     {
         if (empty($this->client)) {
+            // https://github.com/composer/composer/issues/5998
+            require $this->getComposer(true)
+                    ->getConfig()
+                    ->get('vendor-dir') . '/autoload.php';
             $this->client = new Client();
         }
 
@@ -233,6 +280,7 @@ EOT
     private function getNexusExtra($parameter, $default = null)
     {
         $extras = $this->getComposer(true)->getPackage()->getExtra();
+
         if (!empty($extras['nexus-push'][$parameter])) {
             return $extras['nexus-push'][$parameter];
         } else {
