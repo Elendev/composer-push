@@ -16,6 +16,8 @@ class ZipArchiver
      *
      * @param string $source archive source
      * @param string $destination archive destination
+     * @param string $subDirectory subdirectory in which the sources will be
+     *               archived. If null, put at the root of the directory.
      * @param array $ignorePatterns
      *
      * @param \Composer\IO\IOInterface|null $io
@@ -25,12 +27,19 @@ class ZipArchiver
     public static function archiveDirectory(
         $source,
         $destination,
+        $subDirectory = null,
         $ignorePatterns = [],
         $io = null
     ) {
 
         if (empty($io)) {
             $io = new NullIO();
+        }
+
+        if ($subDirectory) {
+            $io->write('[ZIP Archive] Archive into the subdirectory ' . $subDirectory);
+        } else {
+            $io->write('[ZIP Archive] Archive into root directory');
         }
 
         $finder = new Finder();
@@ -54,7 +63,14 @@ class ZipArchiver
         }
 
         foreach ($finder as $fileInfo) {
-            $zipPath = '/' . rtrim($fileSystem->makePathRelative($fileInfo->getRealPath(),
+
+            if ($subDirectory) {
+                $zipPath = '/' . $subDirectory;
+            } else {
+                $zipPath = '';
+            }
+
+            $zipPath .= '/' . rtrim($fileSystem->makePathRelative($fileInfo->getRealPath(),
                     $source), '/');
 
             if (!$fileInfo->isFile()) {

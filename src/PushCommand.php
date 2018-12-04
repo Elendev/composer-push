@@ -55,13 +55,21 @@ EOT
     {
         $fileName = tempnam(sys_get_temp_dir(), 'nexus-push') . '.zip';
 
+        $packageName = $this->getPackageName($input);
+
+        $subdirectory = strtolower(preg_replace(
+            '/[^a-zA-Z0-9_]|\./', '-',
+            $packageName . '-' . $input->getArgument('version')
+        ));
+
         try {
-            ZipArchiver::archiveDirectory(getcwd(), $fileName, ['vendor'],
+            ZipArchiver::archiveDirectory(getcwd(), $fileName, $subdirectory,
+                ['vendor'],
                 $this->getIO());
 
             $url = $this->generateUrl(
               $input->getOption('url'),
-              $input->getOption('name'),
+                $packageName,
               $input->getArgument('version')
             );
 
@@ -255,6 +263,22 @@ EOT
         }
 
         return $this->client;
+    }
+
+    /**
+     * Return the package name based on the given name or the real package name.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface|null $input
+     *
+     * @return string
+     */
+    private function getPackageName(InputInterface $input = null)
+    {
+        if ($input && $input->getOption('name')) {
+            return $input->getOption('name');
+        } else {
+            return $this->getComposer(true)->getPackage()->getName();
+        }
     }
 
     /**
