@@ -65,12 +65,12 @@ class ZipArchiver
         foreach ($finder as $fileInfo) {
 
             if ($subDirectory) {
-                $zipPath = '/' . $subDirectory;
+                $zipPath = $subDirectory . '/';
             } else {
                 $zipPath = '';
             }
 
-            $zipPath .= '/' . rtrim($fileSystem->makePathRelative($fileInfo->getRealPath(),
+            $zipPath .= rtrim($fileSystem->makePathRelative($fileInfo->getRealPath(),
                     $source), '/');
 
             if (!$fileInfo->isFile()) {
