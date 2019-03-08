@@ -34,9 +34,10 @@ class PushCommand extends BaseCommand
             new InputOption('username', null, InputArgument::OPTIONAL,
               'Username to log in the distant Nexus repository'),
             new InputOption('password', null, InputArgument::OPTIONAL, 'Password to log in the distant Nexus repository'),
+            new InputOption('ignore-dirs', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Directories to ignore when creating the zip')
           ])
           ->setHelp(<<<EOT
-The <info>nexus-push</info> command uses the archive command to reate a ZIP
+The <info>nexus-push</info> command uses the archive command to create a ZIP
 archive and send it to the configured (or given) nexus repository.
 EOT
             )
@@ -62,9 +63,11 @@ EOT
             $packageName . '-' . $input->getArgument('version')
         ));
 
+        $ignoredDirectories = array_merge(['vendor'], $input->getOption('ignore-dirs'));
+
         try {
             ZipArchiver::archiveDirectory(getcwd(), $fileName, $subdirectory,
-                ['vendor'],
+                $ignoredDirectories,
                 $this->getIO());
 
             $url = $this->generateUrl(
@@ -99,8 +102,8 @@ EOT
      *
      * @return string URL to the repository
      */
-    private function generateUrl($url, $name, $version) {
-
+    private function generateUrl($url, $name, $version)
+    {
         if (empty($url)) {
             $url = $this->getNexusExtra('url');
 
