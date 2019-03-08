@@ -8,17 +8,19 @@ Composer repository hosted with [nexus-repository-composer](https://github.com/s
  ```
 
 ## Usage
-Many of the options are optionnal since they can be added directly to the `composer.json` file.
+Many of the options are optional since they can be added directly to the `composer.json` file.
 ```bash
  # At the root of your directory
  $ composer nexus-push [--name=<package name>] \
    [--url=<URL to the composer nexus repository>] \
    [--username=USERNAME] \
    [--password=PASSWORD] \
+   [--ignore-dirs=test]\
+   [--ignore-dirs=foo]
    <version>
    
  # Example
- $ composer nexus-push --username=admin --password=admin123 --url=http://localhost:8081/repository/composer 0.0.1
+ $ composer nexus-push --username=admin --password=admin123 --url=http://localhost:8081/repository/composer --ignore-dirs=test --ignore-dirs=foo 0.0.1
  ```
 
 ## Configuration
@@ -29,7 +31,11 @@ It's possible to add some configurations inside the `composer.json` file:
         "nexus-push": {
             "url": "http://localhost:8081/repository/composer/",
             "username": "admin",
-            "password": "admin123"
+            "password": "admin123",
+            "ignore-dirs": [
+                "test",
+                "foo"
+            ]
         }
     }
 }
