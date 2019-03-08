@@ -312,7 +312,7 @@ EOT
         $optionalIgnore = $input->getOption('ignore-dirs');
         $composerIgnores = $this->getNexusExtra('ignore-dirs');
 
-        $ignore = array_merge($composerIgnores, $optionalIgnore);
+        $ignore = array_merge($composerIgnores, $optionalIgnore, ['vendor']);
         return array_unique($ignore);
     }
 
