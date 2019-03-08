@@ -63,7 +63,7 @@ EOT
             $packageName . '-' . $input->getArgument('version')
         ));
 
-        $ignoredDirectories = array_merge(['vendor'], $input->getOption('ignore-dirs'));
+        $ignoredDirectories = $this->getDirectoriesToIgnore($input);
 
         try {
             ZipArchiver::archiveDirectory(getcwd(), $fileName, $subdirectory,
@@ -302,4 +302,18 @@ EOT
             return $default;
         }
     }
+
+    /**
+     * @param InputInterface $input
+     * @return array
+     */
+    private function getDirectoriesToIgnore(InputInterface $input)
+    {
+        $optionalIgnore = $input->getOption('ignore-dirs');
+        $composerIgnores = $this->getNexusExtra('ignore-dirs');
+
+        $ignore = array_merge($composerIgnores, $optionalIgnore, ['vendor']);
+        return array_unique($ignore);
+    }
+
 }
