@@ -22,5 +22,8 @@
     },
     "extra": {
         "class": "Elendev\\NexusComposerPush\\Plugin"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.14"
     }
 }
