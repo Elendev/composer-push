@@ -31,16 +31,16 @@ class PushCommand extends BaseCommand
             new InputOption('name', null, InputArgument::OPTIONAL, 'Name of the package (if different from the composer.json file)'),
             new InputOption('url', null, InputArgument::OPTIONAL, 'URL to the distant Nexus repository'),
             new InputOption(
-              'username',
-              NULL,
-              InputArgument::OPTIONAL,
-              'Username to log in the distant Nexus repository'
+                'username',
+                null,
+                InputArgument::OPTIONAL,
+                'Username to log in the distant Nexus repository'
             ),
             new InputOption('password', null, InputArgument::OPTIONAL, 'Password to log in the distant Nexus repository'),
             new InputOption('ignore-dirs', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Directories to ignore when creating the zip')
           ])
           ->setHelp(
-            <<<EOT
+              <<<EOT
 The <info>nexus-push</info> command uses the archive command to create a ZIP
 archive and send it to the configured (or given) nexus repository.
 EOT
@@ -63,39 +63,39 @@ EOT
         $packageName = $this->getPackageName($input);
 
         $subdirectory = strtolower(preg_replace(
-          '/[^a-zA-Z0-9_]|\./',
-          '-',
+            '/[^a-zA-Z0-9_]|\./',
+            '-',
             $packageName . '-' . $input->getArgument('version')
         ));
 
         $ignoredDirectories = $this->getDirectoriesToIgnore($input);
 
         try {
-          ZipArchiver::archiveDirectory(
-            getcwd(),
-            $fileName,
-            $subdirectory,
-            $ignoredDirectories,
-            $this->getIO()
+            ZipArchiver::archiveDirectory(
+              getcwd(),
+              $fileName,
+              $subdirectory,
+              $ignoredDirectories,
+              $this->getIO()
           );
 
             $url = $this->generateUrl(
-              $input->getOption('url'),
+                $input->getOption('url'),
                 $packageName,
-              $input->getArgument('version')
+                $input->getArgument('version')
             );
 
             $this->getIO()
               ->write(
-                'Execute the Nexus Push for the URL ' . $url . '...',
-                TRUE
+                  'Execute the Nexus Push for the URL ' . $url . '...',
+                  true
               );
 
-          $this->sendFile(
-            $url,
-            $fileName,
-            $input->getOption('username'),
-            $input->getOption('password')
+            $this->sendFile(
+              $url,
+              $fileName,
+              $input->getOption('username'),
+              $input->getOption('password')
           );
 
             $this->getIO()
@@ -103,9 +103,9 @@ EOT
         } finally {
             $this->getIO()
               ->write(
-                'Remove file ' . $fileName,
-                TRUE,
-                IOInterface::VERY_VERBOSE
+                  'Remove file ' . $fileName,
+                  true,
+                  IOInterface::VERY_VERBOSE
               );
             unlink($fileName);
         }
@@ -158,10 +158,10 @@ EOT
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function sendFile(
-      $url,
-      $filePath,
-      $username = NULL,
-      $password = NULL
+        $url,
+        $filePath,
+        $username = null,
+        $password = null
     ) {
         if (!empty($username) && !empty($password)) {
             $this->postFile($url, $filePath, $username, $password);
@@ -177,7 +177,7 @@ EOT
             }
 
 
-          if (preg_match(
+            if (preg_match(
               '{^(?:https?)://([^/]+)(?:/.*)?}',
               $url,
               $match
@@ -195,9 +195,9 @@ EOT
             foreach ($credentials as $type => $credential) {
                 $this->getIO()
                   ->write(
-                    '[postFile] Trying credentials ' . $type,
-                    TRUE,
-                    IOInterface::VERY_VERBOSE
+                      '[postFile] Trying credentials ' . $type,
+                      true,
+                      IOInterface::VERY_VERBOSE
                   );
 
                 $options = [
@@ -212,23 +212,23 @@ EOT
                     if (empty($credential) || empty($credential['username']) || empty($credential['password'])) {
                         $this->getIO()
                           ->write(
-                            '[postFile] Use no credentials',
-                            TRUE,
-                            IOInterface::VERY_VERBOSE
+                              '[postFile] Use no credentials',
+                              true,
+                              IOInterface::VERY_VERBOSE
                           );
                         $this->postFile($url, $filePath);
                     } else {
                         $this->getIO()
                           ->write(
-                            '[postFile] Use user ' . $credential['username'],
-                            TRUE,
-                            IOInterface::VERY_VERBOSE
+                              '[postFile] Use user ' . $credential['username'],
+                              true,
+                              IOInterface::VERY_VERBOSE
                           );
-                      $this->postFile(
-                        $url,
-                        $filePath,
-                        $credential['username'],
-                        $credential['password']
+                        $this->postFile(
+                          $url,
+                          $filePath,
+                          $credential['username'],
+                          $credential['password']
                       );
                     }
 
@@ -238,24 +238,24 @@ EOT
                         if ($type === 'none') {
                             $this->getIO()
                               ->write(
-                                'Unable to push on server (authentication required)',
-                                TRUE,
-                                IOInterface::VERY_VERBOSE
+                                  'Unable to push on server (authentication required)',
+                                  true,
+                                  IOInterface::VERY_VERBOSE
                               );
                         } else {
                             $this->getIO()
                               ->write(
-                                'Unable to authenticate on server with credentials ' . $type,
-                                TRUE,
-                                IOInterface::VERY_VERBOSE
+                                  'Unable to authenticate on server with credentials ' . $type,
+                                  true,
+                                  IOInterface::VERY_VERBOSE
                               );
                         }
                     } else {
                         $this->getIO()
                           ->writeError(
-                            'A network error occured while trying to upload to nexus: ' . $e->getMessage(),
-                            TRUE,
-                            IOInterface::QUIET
+                              'A network error occured while trying to upload to nexus: ' . $e->getMessage(),
+                              true,
+                              IOInterface::QUIET
                           );
                     }
                 }

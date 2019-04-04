@@ -52,16 +52,16 @@ class ZipArchiver
 
         $archive = new \ZipArchive();
 
-      $io->write(
-        'Create ZIP file ' . $destination,
-        TRUE,
-        IOInterface::VERY_VERBOSE
+        $io->write(
+          'Create ZIP file ' . $destination,
+          true,
+          IOInterface::VERY_VERBOSE
       );
 
         if (!$archive->open($destination, \ZipArchive::CREATE)) {
-          $io->writeError(
-            'Impossible to create ZIP file ' . $destination,
-            TRUE
+            $io->writeError(
+              'Impossible to create ZIP file ' . $destination,
+              true
           );
             throw new \Exception('Impossible to create the file ' . $destination);
         }
@@ -73,19 +73,19 @@ class ZipArchiver
                 $zipPath = '';
             }
 
-          $zipPath .= rtrim($fileSystem->makePathRelative(
-            $fileInfo->getRealPath(),
-            $source
+            $zipPath .= rtrim($fileSystem->makePathRelative(
+              $fileInfo->getRealPath(),
+              $source
           ), '/');
 
             if (!$fileInfo->isFile()) {
                 continue;
             }
 
-          $io->write(
-            'Zip file ' . $fileInfo->getPath() . ' to ' . $zipPath,
-            TRUE,
-            IOInterface::VERY_VERBOSE
+            $io->write(
+              'Zip file ' . $fileInfo->getPath() . ' to ' . $zipPath,
+              true,
+              IOInterface::VERY_VERBOSE
           );
             $archive->addFile($fileInfo->getRealPath(), $zipPath);
         }
