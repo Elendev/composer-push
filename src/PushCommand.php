@@ -75,7 +75,7 @@ EOT
             getcwd(),
             $fileName,
             $subdirectory,
-                $ignoredDirectories,
+            $ignoredDirectories,
             $this->getIO()
           );
 
@@ -94,7 +94,7 @@ EOT
           $this->sendFile(
             $url,
             $fileName,
-                $input->getOption('username'),
+            $input->getOption('username'),
             $input->getOption('password')
           );
 
