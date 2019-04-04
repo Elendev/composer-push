@@ -72,11 +72,11 @@ EOT
 
         try {
             ZipArchiver::archiveDirectory(
-              getcwd(),
-              $fileName,
-              $subdirectory,
-              $ignoredDirectories,
-              $this->getIO()
+                getcwd(),
+                $fileName,
+                $subdirectory,
+                $ignoredDirectories,
+                $this->getIO()
           );
 
             $url = $this->generateUrl(
@@ -92,10 +92,10 @@ EOT
               );
 
             $this->sendFile(
-              $url,
-              $fileName,
-              $input->getOption('username'),
-              $input->getOption('password')
+                $url,
+                $fileName,
+                $input->getOption('username'),
+                $input->getOption('password')
           );
 
             $this->getIO()
@@ -178,9 +178,9 @@ EOT
 
 
             if (preg_match(
-              '{^(?:https?)://([^/]+)(?:/.*)?}',
-              $url,
-              $match
+                '{^(?:https?)://([^/]+)(?:/.*)?}',
+                $url,
+                $match
             ) && $this->getIO()->hasAuthentication($match[1])) {
                 $auth = $this->getIO()->getAuthentication($match[1]);
                 $credentials['auth.json'] = [
@@ -225,10 +225,10 @@ EOT
                               IOInterface::VERY_VERBOSE
                           );
                         $this->postFile(
-                          $url,
-                          $filePath,
-                          $credential['username'],
-                          $credential['password']
+                            $url,
+                            $filePath,
+                            $credential['username'],
+                            $credential['password']
                       );
                     }
 
