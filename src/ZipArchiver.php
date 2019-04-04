@@ -31,7 +31,6 @@ class ZipArchiver
         $ignorePatterns = [],
         $io = null
     ) {
-
         if (empty($io)) {
             $io = new NullIO();
         }
@@ -53,37 +52,45 @@ class ZipArchiver
 
         $archive = new \ZipArchive();
 
-        $io->write('Create ZIP file ' . $destination, true,
-            IOInterface::VERY_VERBOSE);
+      $io->write(
+        'Create ZIP file ' . $destination,
+        TRUE,
+        IOInterface::VERY_VERBOSE
+      );
 
         if (!$archive->open($destination, \ZipArchive::CREATE)) {
-            $io->writeError('Impossible to create ZIP file ' . $destination,
-                true);
+          $io->writeError(
+            'Impossible to create ZIP file ' . $destination,
+            TRUE
+          );
             throw new \Exception('Impossible to create the file ' . $destination);
         }
 
         foreach ($finder as $fileInfo) {
-
             if ($subDirectory) {
                 $zipPath = $subDirectory . '/';
             } else {
                 $zipPath = '';
             }
 
-            $zipPath .= rtrim($fileSystem->makePathRelative($fileInfo->getRealPath(),
-                    $source), '/');
+          $zipPath .= rtrim($fileSystem->makePathRelative(
+            $fileInfo->getRealPath(),
+            $source
+          ), '/');
 
             if (!$fileInfo->isFile()) {
                 continue;
             }
 
-            $io->write('Zip file ' . $fileInfo->getPath() . ' to ' . $zipPath,
-                true, IOInterface::VERY_VERBOSE);
+          $io->write(
+            'Zip file ' . $fileInfo->getPath() . ' to ' . $zipPath,
+            TRUE,
+            IOInterface::VERY_VERBOSE
+          );
             $archive->addFile($fileInfo->getRealPath(), $zipPath);
         }
 
         $io->write('Zip archive ' . $destination . ' done');
         $archive->close();
     }
-
 }
