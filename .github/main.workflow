@@ -1,6 +1,6 @@
 workflow "On push" {
   on = "push"
-  resolves = ["docker://php:7.2-cli"]
+  resolves = ["PHP CS Fixer"]
 }
 
 action "Composer install" {
@@ -10,6 +10,6 @@ action "Composer install" {
 
 action "PHP CS Fixer" {
   uses = "docker://php:7.2-cli"
-  needs = ["composer"]
+  needs = ["Composer install"]
   args = "vendor/bin/php-cs-fixer fix src --dry-run"
 }
