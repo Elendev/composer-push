@@ -16,7 +16,9 @@ Many of the options are optional since they can be added directly to the `compos
    [--username=USERNAME] \
    [--password=PASSWORD] \
    [--ignore-dirs=test]\
-   [--ignore-dirs=foo]
+   [--ignore-dirs=foo/bar]\
+   [--ignore-files=config/local.php]\
+   [--ignore-files=foo/bar.php]\
    <version>
    
  # Example
@@ -34,7 +36,10 @@ It's possible to add some configurations inside the `composer.json` file:
             "password": "admin123",
             "ignore-dirs": [
                 "test",
-                "foo"
+                "foo/bar"
+            ],
+            "ignore-files": [
+                "config/local.php"
             ]
         }
     }

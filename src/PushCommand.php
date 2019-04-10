@@ -37,7 +37,8 @@ class PushCommand extends BaseCommand
                 'Username to log in the distant Nexus repository'
             ),
             new InputOption('password', null, InputArgument::OPTIONAL, 'Password to log in the distant Nexus repository'),
-            new InputOption('ignore-dirs', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Directories to ignore when creating the zip')
+            new InputOption('ignore-dirs', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Directories to ignore when creating the zip'),
+            new InputOption('ignore-files', 'f', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Files to ignore when creating the zip')
           ])
           ->setHelp(
               <<<EOT
@@ -69,6 +70,7 @@ EOT
         ));
 
         $ignoredDirectories = $this->getDirectoriesToIgnore($input);
+        $ignoredFiles = $this->getFilesToIgnore($input);
 
         try {
             ZipArchiver::archiveDirectory(
@@ -76,6 +78,7 @@ EOT
                 $fileName,
                 $subdirectory,
                 $ignoredDirectories,
+                $ignoredFiles,
                 $this->getIO()
           );
 
@@ -351,6 +354,15 @@ EOT
         $composerIgnores = $this->getNexusExtra('ignore-dirs', []);
 
         $ignore = array_merge($composerIgnores, $optionalIgnore, ['vendor']);
+        return array_unique($ignore);
+    }
+
+    private function getFilesToIgnore(InputInterface $input)
+    {
+        $optionalIgnore = $input->getOption('ignore-files');
+        $composerIgnores = $this->getNexusExtra('ignore-files', []);
+
+        $ignore = array_merge($composerIgnores, $optionalIgnore);
         return array_unique($ignore);
     }
 }
