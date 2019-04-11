@@ -39,6 +39,7 @@ class PushCommand extends BaseCommand
             new InputOption('password', null, InputArgument::OPTIONAL, 'Password to log in the distant Nexus repository'),
             new InputOption('ignore', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Directories and files to ignore when creating the zip'),
             new InputOption('ignore-dirs', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, '<error>DEPRECATED</error> Directories to ignore when creating the zip'),
+            new InputOption('ignore-by-git-attributes', null, InputOption::VALUE_NONE, 'Ignore .gitattrbutes export-ignore directories when creating the zip'),
           ])
           ->setHelp(
               <<<EOT
@@ -70,6 +71,12 @@ EOT
         ));
 
         $ignoredDirectories = $this->getIgnores($input);
+        $this->getIO()
+            ->write(
+                'Ignore directories: ' . join(' ', $ignoredDirectories),
+                true,
+                IOInterface::VERY_VERBOSE
+            );
 
         try {
             ZipArchiver::archiveDirectory(
@@ -355,9 +362,10 @@ EOT
 
         $optionalIgnore = $input->getOption('ignore');
         $composerIgnores = $this->getNexusExtra('ignore', []);
+        $gitAttrIgnores = $this->getGitAttributesExportIgnores($input);
         $defaultIgnores = ['vendor/'];
 
-        $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $defaultIgnores );
+        $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $defaultIgnores );
         return array_unique($ignore);
 
     }
@@ -382,5 +390,34 @@ EOT
 
         $ignore = array_merge($composerIgnores, $optionalIgnore);
         return array_unique($ignore);
+    }
+
+    private function getGitAttributesExportIgnores(InputInterface $input)
+    {
+        $option = $input->getOption('ignore-by-git-attributes');
+        $extra = $this->getNexusExtra('ignore-by-git-attributes', false);
+        if (!$option && !$extra) {
+            return [];
+        }
+
+        $path = getcwd() . '/.gitattributes';
+        if (!is_file($path)) {
+            return [];
+        }
+
+        $contents = file_get_contents($path);
+        $lines = explode(PHP_EOL, $contents);
+        $ignores = [];
+        foreach ($lines as $line) {
+            if ($line = trim($line)) {
+                // ignore if end with `export-ignore`
+                $diff = strlen($line) - 13;
+                if ($diff > 0 && strpos($line, 'export-ignore', $diff) !== false) {
+                    $ignores[] = trim(trim(explode(' ', $line)[0]), DIRECTORY_SEPARATOR);
+                }
+            }
+        }
+
+        return $ignores;
     }
 }

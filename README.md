@@ -17,6 +17,7 @@ Many of the options are optional since they can be added directly to the `compos
    [--password=PASSWORD] \
    [--ignore=test.php]\
    [--ignore=foo/]\
+   [--ignore-by-git-attributes]
    <version>
    
  # Example
@@ -32,6 +33,7 @@ It's possible to add some configurations inside the `composer.json` file:
             "url": "http://localhost:8081/repository/composer/",
             "username": "admin",
             "password": "admin123",
+            "ignore-by-git-attributes": true,
             "ignore": [
                 "test.php",
                 "foo/"
