@@ -37,8 +37,8 @@ class PushCommand extends BaseCommand
                 'Username to log in the distant Nexus repository'
             ),
             new InputOption('password', null, InputArgument::OPTIONAL, 'Password to log in the distant Nexus repository'),
-            new InputOption('ignore-dirs', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Directories to ignore when creating the zip'),
-            new InputOption('ignore-files', 'f', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Files to ignore when creating the zip')
+            new InputOption('ignore', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Directories and files to ignore when creating the zip'),
+            new InputOption('ignore-dirs', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, '<error>DEPRECATED</error> Directories to ignore when creating the zip'),
           ])
           ->setHelp(
               <<<EOT
@@ -69,8 +69,7 @@ EOT
             $packageName . '-' . $input->getArgument('version')
         ));
 
-        $ignoredDirectories = $this->getDirectoriesToIgnore($input);
-        $ignoredFiles = $this->getFilesToIgnore($input);
+        $ignoredDirectories = $this->getIgnores($input);
 
         try {
             ZipArchiver::archiveDirectory(
@@ -78,7 +77,6 @@ EOT
                 $fileName,
                 $subdirectory,
                 $ignoredDirectories,
-                $ignoredFiles,
                 $this->getIO()
           );
 
@@ -344,8 +342,23 @@ EOT
         }
     }
 
+    private function getIgnores(InputInterface $input)
+    {
+        // Remove after removal of --ignore-dirs option
+        $deprecatedIgnores = $this->getDirectoriesToIgnore($input);
+
+        $optionalIgnore = $input->getOption('ignore');
+        $composerIgnores = $this->getNexusExtra('ignore', []);
+        $defaultIgnores = ['vendor/'];
+
+        $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $defaultIgnores );
+        return array_unique($ignore);
+
+    }
+
     /**
      * @param InputInterface $input
+     * @deprecated argument has been changed to ignore
      * @return array
      */
     private function getDirectoriesToIgnore(InputInterface $input)
@@ -353,14 +366,13 @@ EOT
         $optionalIgnore = $input->getOption('ignore-dirs');
         $composerIgnores = $this->getNexusExtra('ignore-dirs', []);
 
-        $ignore = array_merge($composerIgnores, $optionalIgnore, ['vendor']);
-        return array_unique($ignore);
-    }
+        if (!empty($optionalIgnore)) {
+            $this->getIO()->write('<error>The --ignore-dirs option has been deprecated. Please use --ignore instead</error>');
+        }
 
-    private function getFilesToIgnore(InputInterface $input)
-    {
-        $optionalIgnore = $input->getOption('ignore-files');
-        $composerIgnores = $this->getNexusExtra('ignore-files', []);
+        if (!empty($composerIgnores)) {
+            $this->getIO()->write('<error>The ignore-dirs config option has been deprecated. Please use ignore instead</error>');
+        }
 
         $ignore = array_merge($composerIgnores, $optionalIgnore);
         return array_unique($ignore);

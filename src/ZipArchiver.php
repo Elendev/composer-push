@@ -18,8 +18,7 @@ class ZipArchiver
      * @param string $destination archive destination
      * @param string $subDirectory subdirectory in which the sources will be
      *               archived. If null, put at the root of the directory.
-     * @param array $ignoreDirectories
-     * @param array $ignoreFiles
+     * @param array $ignores
      * @param \Composer\IO\IOInterface|null $io
      *
      * @throws \Exception
@@ -28,8 +27,7 @@ class ZipArchiver
         $source,
         $destination,
         $subDirectory = null,
-        $ignoreDirectories = [],
-        $ignoreFiles = [],
+        $ignores = [],
         $io = null
     ) {
         if (empty($io)) {
@@ -47,13 +45,10 @@ class ZipArchiver
 
         $finder->in($source)->ignoreVCS(true);
 
-        foreach ($ignoreDirectories as $ignoreDirectory) {
-            $finder->exclude($ignoreDirectory);
+        foreach ($ignores as $ignore) {
+            $finder->notPath($ignore);
         }
 
-        foreach ($ignoreFiles as $ignoreFile) {
-            $finder->notPath($ignoreFile);
-        }
 
         $archive = new \ZipArchive();
 
