@@ -342,6 +342,12 @@ EOT
         }
     }
 
+    /**
+     * Fetch any directories or files to be excluded from zip creation
+     *
+     * @param InputInterface $input
+     * @return array
+     */
     private function getIgnores(InputInterface $input)
     {
         // Remove after removal of --ignore-dirs option
