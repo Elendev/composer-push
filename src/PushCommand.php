@@ -365,9 +365,8 @@ EOT
         $gitAttrIgnores = $this->getGitAttributesExportIgnores($input);
         $defaultIgnores = ['vendor/'];
 
-        $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $defaultIgnores );
+        $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $defaultIgnores);
         return array_unique($ignore);
-
     }
 
     /**
