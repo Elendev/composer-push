@@ -356,16 +356,20 @@ EOT
     {
         $optionalIgnore = $input->getOption('ignore-dirs');
         $composerIgnores = $this->getNexusExtra('ignore-dirs', []);
-        $gitAttrIgnores = $input->getOption('ignore-by-git-attributes')
-            ? $this->getGitAttributesExportIgnores()
-            : [];
+        $gitAttrIgnores = $this->getGitAttributesExportIgnores($input);
 
         $ignore = array_merge($composerIgnores, $optionalIgnore, ['vendor'], $gitAttrIgnores);
         return array_unique($ignore);
     }
 
-    private function getGitAttributesExportIgnores()
+    private function getGitAttributesExportIgnores(InputInterface $input)
     {
+        $option = $input->getOption('ignore-by-git-attributes');
+        $extra = $this->getNexusExtra('ignore-by-git-attributes', false);
+        if (!$option && !$extra) {
+            return [];
+        }
+
         $path = getcwd() . '/.gitattributes';
         if (!is_file($path)) {
             return [];
