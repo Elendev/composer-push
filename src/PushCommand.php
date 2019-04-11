@@ -37,7 +37,8 @@ class PushCommand extends BaseCommand
                 'Username to log in the distant Nexus repository'
             ),
             new InputOption('password', null, InputArgument::OPTIONAL, 'Password to log in the distant Nexus repository'),
-            new InputOption('ignore-dirs', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Directories to ignore when creating the zip'),
+            new InputOption('ignore', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Directories and files to ignore when creating the zip'),
+            new InputOption('ignore-dirs', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, '<error>DEPRECATED</error> Directories to ignore when creating the zip'),
             new InputOption('ignore-by-git-attributes', null, InputOption::VALUE_NONE, 'Ignore .gitattrbutes export-ignore directories when creating the zip'),
           ])
           ->setHelp(
@@ -69,7 +70,7 @@ EOT
             $packageName . '-' . $input->getArgument('version')
         ));
 
-        $ignoredDirectories = $this->getDirectoriesToIgnore($input);
+        $ignoredDirectories = $this->getIgnores($input);
         $this->getIO()
             ->write(
                 'Ignore directories: ' . join(' ', $ignoredDirectories),
@@ -349,16 +350,45 @@ EOT
     }
 
     /**
+     * Fetch any directories or files to be excluded from zip creation
+     *
      * @param InputInterface $input
+     * @return array
+     */
+    private function getIgnores(InputInterface $input)
+    {
+        // Remove after removal of --ignore-dirs option
+        $deprecatedIgnores = $this->getDirectoriesToIgnore($input);
+
+        $optionalIgnore = $input->getOption('ignore');
+        $composerIgnores = $this->getNexusExtra('ignore', []);
+        $gitAttrIgnores = $this->getGitAttributesExportIgnores($input);
+        $defaultIgnores = ['vendor/'];
+
+        $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $defaultIgnores );
+        return array_unique($ignore);
+
+    }
+
+    /**
+     * @param InputInterface $input
+     * @deprecated argument has been changed to ignore
      * @return array
      */
     private function getDirectoriesToIgnore(InputInterface $input)
     {
         $optionalIgnore = $input->getOption('ignore-dirs');
         $composerIgnores = $this->getNexusExtra('ignore-dirs', []);
-        $gitAttrIgnores = $this->getGitAttributesExportIgnores($input);
 
-        $ignore = array_merge($composerIgnores, $optionalIgnore, ['vendor'], $gitAttrIgnores);
+        if (!empty($optionalIgnore)) {
+            $this->getIO()->write('<error>The --ignore-dirs option has been deprecated. Please use --ignore instead</error>');
+        }
+
+        if (!empty($composerIgnores)) {
+            $this->getIO()->write('<error>The ignore-dirs config option has been deprecated. Please use ignore instead</error>');
+        }
+
+        $ignore = array_merge($composerIgnores, $optionalIgnore);
         return array_unique($ignore);
     }
 

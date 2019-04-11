@@ -15,13 +15,13 @@ Many of the options are optional since they can be added directly to the `compos
    [--url=<URL to the composer nexus repository>] \
    [--username=USERNAME] \
    [--password=PASSWORD] \
-   [--ignore-dirs=test] \
-   [--ignore-dirs=foo] \
+   [--ignore=test.php]\
+   [--ignore=foo/]\
    [--ignore-by-git-attributes]
    <version>
    
  # Example
- $ composer nexus-push --username=admin --password=admin123 --url=http://localhost:8081/repository/composer --ignore-dirs=test --ignore-dirs=foo 0.0.1
+ $ composer nexus-push --username=admin --password=admin123 --url=http://localhost:8081/repository/composer --ignore=test.php --ignore=foo/ 0.0.1
  ```
 
 ## Configuration
@@ -34,9 +34,9 @@ It's possible to add some configurations inside the `composer.json` file:
             "username": "admin",
             "password": "admin123",
             "ignore-by-git-attributes": true,
-            "ignore-dirs": [
-                "test",
-                "foo"
+            "ignore": [
+                "test.php",
+                "foo/"
             ]
         }
     }
