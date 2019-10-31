@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class PushCommand extends BaseCommand
 {
@@ -299,18 +300,42 @@ EOT
     }
 
     /**
+     * @throws FileNotFoundException
      * @return \GuzzleHttp\Client|\GuzzleHttp\ClientInterface
      */
     private function getClient()
     {
         if (empty($this->client)) {
             // https://github.com/composer/composer/issues/5998
-            require $this->getComposer(true)
-                    ->getConfig()
+            $composer = $this->getComposer(true);
+            $autoload = $composer->getConfig()
                     ->get('vendor-dir') . '/autoload.php';
+
+            // Show an error if the file wasn't found in the current project.
+            if (!file_exists($autoload)) {
+                throw new FileNotFoundException("vendor/autoload.php not found, did you run composer install?");
+            }
+
+            // Require the guzzle functions manually.
+            $guzzlefunctions = $composer->getConfig()->get('home') . '/vendor/guzzlehttp/guzzle/src/functions_include.php';
+            if (!file_exists($guzzlefunctions)) {
+                throw new FileNotFoundException("guzzlehttp/guzzle/src/functions.php not found, is guzzle installed?");
+            }
+            $guzzlepsr7functions = $composer->getConfig()->get('home') . '/vendor/guzzlehttp/psr7/src/functions_include.php';
+            if (!file_exists($guzzlepsr7functions)) {
+                throw new FileNotFoundException("guzzlehttp/psr7/src/functions.php not found, is guzzle installed?");
+            }
+            $guzzlepromisesfunctions = $composer->getConfig()->get('home') . '/vendor/guzzlehttp/promises/src/functions_include.php';
+            if (!file_exists($guzzlepromisesfunctions)) {
+                throw new FileNotFoundException("guzzlehttp/promises/src/functions.php not found, is guzzle installed?");
+            }
+            require $guzzlefunctions;
+            require $guzzlepsr7functions;
+            require $guzzlepromisesfunctions;
+            require $autoload;
+
             $this->client = new Client();
         }
-
         return $this->client;
     }
 
