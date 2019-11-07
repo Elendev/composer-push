@@ -41,6 +41,7 @@ class PushCommand extends BaseCommand
             new InputOption('ignore', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Directories and files to ignore when creating the zip'),
             new InputOption('ignore-dirs', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, '<error>DEPRECATED</error> Directories to ignore when creating the zip'),
             new InputOption('ignore-by-git-attributes', null, InputOption::VALUE_NONE, 'Ignore .gitattrbutes export-ignore directories when creating the zip'),
+            new InputOption('ignore-by-composer', null, InputOption::VALUE_NONE, 'Ignore composer.json archive-exclude files and directories when creating the zip'),
           ])
           ->setHelp(
               <<<EOT
@@ -388,9 +389,10 @@ EOT
         $optionalIgnore = $input->getOption('ignore');
         $composerIgnores = $this->getNexusExtra('ignore', []);
         $gitAttrIgnores = $this->getGitAttributesExportIgnores($input);
+        $composerJsonIgnores = $this->getComposerJsonArchiveExcludeIgnores($input);
         $defaultIgnores = ['vendor/'];
 
-        $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $defaultIgnores);
+        $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $composerJsonIgnores, $defaultIgnores);
         return array_unique($ignore);
     }
 
@@ -440,6 +442,28 @@ EOT
                     $ignores[] = trim(trim(explode(' ', $line)[0]), DIRECTORY_SEPARATOR);
                 }
             }
+        }
+
+        return $ignores;
+    }
+
+    private function getComposerJsonArchiveExcludeIgnores(InputInterface $input)
+    {
+        $option = $input->getOption('ignore-by-composer');
+        $extra = $this->getNexusExtra('ignore-by-composer', false);
+        if (!$option && !$extra) {
+            return [];
+        }
+
+        $path = getcwd() . '/composer.json';
+        
+        $contents = file_get_contents($path);
+        $jsonContents = json_decode($contents, true);
+        $ignores = [];
+        if (array_key_exists('archive', $jsonContents) && array_key_exists('exclude', $jsonContents['archive'])) {
+            foreach ($jsonContents['archive']['exclude'] as $exclude) {
+                $ignores[] = trim($exclude, DIRECTORY_SEPARATOR);
+            }   
         }
 
         return $ignores;
