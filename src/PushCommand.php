@@ -396,6 +396,8 @@ EOT
 
 	if ( ! $input->getOption('keep-vendor') ){
 		$defaultIgnores = ['vendor/'];
+	} else {
+		$defaultIgnores = [];
 	}
 
         $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $composerJsonIgnores, $defaultIgnores);
