@@ -311,27 +311,27 @@ EOT
     {
         if (empty($this->client)) {
             // https://github.com/composer/composer/issues/5998
-            $composer = $this->getComposer(true);
-            $autoload = $composer->getConfig()
-                    ->get('vendor-dir') . '/autoload.php';
+	    $composer = $this->getComposer(true);
+            $vendorDir = $composer->getConfig()->get('vendor-dir');
+            $autoload = $vendorDir . '/autoload.php';
 
             // Show an error if the file wasn't found in the current project.
             if (!file_exists($autoload)) {
-                throw new FileNotFoundException("vendor/autoload.php not found, did you run composer install?");
+                throw new FileNotFoundException($vendorDir . "/autoload.php not found, did you run composer install?");
             }
 
             // Require the guzzle functions manually.
-            $guzzlefunctions = $composer->getConfig()->get('home') . '/vendor/guzzlehttp/guzzle/src/functions_include.php';
+            $guzzlefunctions = $vendorDir . '/guzzlehttp/guzzle/src/functions_include.php';
             if (!file_exists($guzzlefunctions)) {
-                throw new FileNotFoundException("guzzlehttp/guzzle/src/functions.php not found, is guzzle installed?");
+                throw new FileNotFoundException($guzzlefunctions . " not found, is guzzle installed?");
             }
-            $guzzlepsr7functions = $composer->getConfig()->get('home') . '/vendor/guzzlehttp/psr7/src/functions_include.php';
+            $guzzlepsr7functions = $vendorDir . '/guzzlehttp/psr7/src/functions_include.php';
             if (!file_exists($guzzlepsr7functions)) {
-                throw new FileNotFoundException("guzzlehttp/psr7/src/functions.php not found, is guzzle installed?");
+                throw new FileNotFoundException($guzzlepsr7functions . "not found, is guzzle installed?");
             }
-            $guzzlepromisesfunctions = $composer->getConfig()->get('home') . '/vendor/guzzlehttp/promises/src/functions_include.php';
+            $guzzlepromisesfunctions = $vendorDir . '/guzzlehttp/promises/src/functions_include.php';
             if (!file_exists($guzzlepromisesfunctions)) {
-                throw new FileNotFoundException("guzzlehttp/promises/src/functions.php not found, is guzzle installed?");
+                throw new FileNotFoundException($guzzlepsr7functions . " not found, is guzzle installed?");
             }
             require $guzzlefunctions;
             require $guzzlepsr7functions;
