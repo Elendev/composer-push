@@ -42,6 +42,8 @@ class PushCommand extends BaseCommand
             new InputOption('ignore-dirs', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, '<error>DEPRECATED</error> Directories to ignore when creating the zip'),
             new InputOption('ignore-by-git-attributes', null, InputOption::VALUE_NONE, 'Ignore .gitattrbutes export-ignore directories when creating the zip'),
             new InputOption('ignore-by-composer', null, InputOption::VALUE_NONE, 'Ignore composer.json archive-exclude files and directories when creating the zip'),
+            new InputOption('keep-vendor', null, InputOption::VALUE_NONE, 'Keep vendor directory when creating zip'),
+            new InputOption('keep-dot-files', null, InputOption::VALUE_NONE, 'Keep dots files/dirs when creating zip')
           ])
           ->setHelp(
               <<<EOT
@@ -85,7 +87,8 @@ EOT
                 getcwd(),
                 $fileName,
                 $subdirectory,
-                $ignoredDirectories,
+		$ignoredDirectories,
+		($input && $input->getOption('keep-dot-files')),
                 $this->getIO()
           );
 
@@ -389,8 +392,11 @@ EOT
         $optionalIgnore = $input->getOption('ignore');
         $composerIgnores = $this->getNexusExtra('ignore', []);
         $gitAttrIgnores = $this->getGitAttributesExportIgnores($input);
-        $composerJsonIgnores = $this->getComposerJsonArchiveExcludeIgnores($input);
-        $defaultIgnores = ['vendor/'];
+	$composerJsonIgnores = $this->getComposerJsonArchiveExcludeIgnores($input);
+
+	if ( ! $input->getOption('keep-vendor') ){
+		$defaultIgnores = ['vendor/'];
+	}
 
         $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $composerJsonIgnores, $defaultIgnores);
         return array_unique($ignore);
