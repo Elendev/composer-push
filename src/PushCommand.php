@@ -42,6 +42,8 @@ class PushCommand extends BaseCommand
             new InputOption('ignore-dirs', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, '<error>DEPRECATED</error> Directories to ignore when creating the zip'),
             new InputOption('ignore-by-git-attributes', null, InputOption::VALUE_NONE, 'Ignore .gitattrbutes export-ignore directories when creating the zip'),
             new InputOption('ignore-by-composer', null, InputOption::VALUE_NONE, 'Ignore composer.json archive-exclude files and directories when creating the zip'),
+            new InputOption('src-url', null, InputArgument::OPTIONAL, 'The source url pushed on composer on distant Nexus repository'),
+            new InputOption('src-ref', null, InputArgument::OPTIONAL, 'The source reference pushed on composer on distant Nexus repository')
           ])
           ->setHelp(
               <<<EOT
@@ -71,6 +73,8 @@ EOT
             '-',
             $packageName . '-' . $input->getArgument('version')
         ));
+        $sourceUrl = $input->hasArgument('src-url') ? $input->getArgument('src-url') : null;
+        $sourceReference = $input->hasArgument('src-ref') ? $input->getArgument('src-ref') : null;
 
         $ignoredDirectories = $this->getIgnores($input);
         $this->getIO()
@@ -104,6 +108,8 @@ EOT
             $this->sendFile(
                 $url,
                 $fileName,
+                $sourceUrl,
+                $sourceReference,
                 $input->getOption('username'),
                 $input->getOption('password')
           );
@@ -161,6 +167,8 @@ EOT
      *
      * @param string $url URL to send the file to
      * @param string $filePath path to the file to send
+     * @param string|null $sourceUrl the Url which will be added as source in composer
+     * @param string|null $sourceReference the reference which will be added as source in composer
      * @param string|null $username
      * @param string|null $password
      *
@@ -170,11 +178,13 @@ EOT
     private function sendFile(
         $url,
         $filePath,
+        $sourceUrl = null,
+        $sourceReference = null,
         $username = null,
         $password = null
     ) {
         if (!empty($username) && !empty($password)) {
-            $this->postFile($url, $filePath, $username, $password);
+            $this->postFile($url, $filePath, $sourceUrl, $sourceReference, $username, $password);
             return;
         } else {
             $credentials = [];
@@ -210,14 +220,6 @@ EOT
                       IOInterface::VERY_VERBOSE
                   );
 
-                $options = [
-                  'body' => fopen($filePath, 'r'),
-                ];
-
-                if (!empty($credential)) {
-                    $options['auth'] = $credential;
-                }
-
                 try {
                     if (empty($credential) || empty($credential['username']) || empty($credential['password'])) {
                         $this->getIO()
@@ -226,7 +228,7 @@ EOT
                               true,
                               IOInterface::VERY_VERBOSE
                           );
-                        $this->postFile($url, $filePath);
+                        $this->postFile($url, $filePath, $sourceUrl, $sourceReference);
                     } else {
                         $this->getIO()
                           ->write(
@@ -237,6 +239,8 @@ EOT
                         $this->postFile(
                             $url,
                             $filePath,
+                            $sourceUrl,
+                            $sourceReference,
                             $credential['username'],
                             $credential['password']
                       );
@@ -281,17 +285,37 @@ EOT
      *
      * @param $url
      * @param $file
+     * @param $sourceUrl
+     * @param $sourceReference
      * @param $username
      * @param $password
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function postFile($url, $file, $username = null, $password = null)
+    private function postFile($url, $file, $sourceUrl = null, $sourceReference = null, $username = null, $password = null)
     {
         $options = [
-            'body' => fopen($file, 'r'),
             'debug' => $this->getIO()->isVeryVerbose(),
         ];
+        if (!empty($sourceUrl) && !empty($sourceReference)) {
+            $options['multipart'] = [
+                [
+                    'Content-Type' => 'multipart/form-data',
+                    'name' => 'package',
+                    'contents' => fopen($file, 'r')
+                ],
+                [
+                    'name' => 'src-url',
+                    'contents' => $sourceUrl
+                ],
+                [
+                    'name' => 'src-ref',
+                    'contents' => $sourceReference
+                ]
+            ];
+        } else {
+            $options['body'] = fopen($file, 'r');
+        }
 
         if (!empty($username) && !empty($password)) {
             $options['auth'] = [$username, $password];
@@ -309,8 +333,9 @@ EOT
         if (empty($this->client)) {
             // https://github.com/composer/composer/issues/5998
             $composer = $this->getComposer(true);
-            $autoload = $composer->getConfig()
-                    ->get('vendor-dir') . '/autoload.php';
+            $homeDir = $composer->getConfig()->get('home');
+            $vendorDir = $composer->getConfig()->get('vendor-dir');
+            $autoload = "$vendorDir/autoload.php";
 
             // Show an error if the file wasn't found in the current project.
             if (!file_exists($autoload)) {
@@ -318,17 +343,26 @@ EOT
             }
 
             // Require the guzzle functions manually.
-            $guzzlefunctions = $composer->getConfig()->get('vendor-dir') . '/guzzlehttp/guzzle/src/functions_include.php';
+            $guzzlefunctions = "$vendorDir/guzzlehttp/guzzle/src/functions_include.php";
             if (!file_exists($guzzlefunctions)) {
-                throw new FileNotFoundException("$guzzlefunctions not found, is guzzle installed?");
+                $guzzlefunctions = "$homeDir/guzzlehttp/guzzle/src/functions_include.php";
+                if (!file_exists($guzzlefunctions)) {
+                    throw new FileNotFoundException("$guzzlefunctions not found, is guzzle installed?");
+                }
             }
-            $guzzlepsr7functions = $composer->getConfig()->get('vendor-dir') . '/guzzlehttp/psr7/src/functions_include.php';
+            $guzzlepsr7functions = "$vendorDir/guzzlehttp/psr7/src/functions_include.php";
             if (!file_exists($guzzlepsr7functions)) {
-                throw new FileNotFoundException("$guzzlepsr7functions not found, is guzzle installed?");
+                $guzzlepsr7functions = "$homeDir/guzzlehttp/psr7/src/functions_include.php";
+                if (!file_exists($guzzlepsr7functions)) {
+                    throw new FileNotFoundException("$guzzlepsr7functions not found, is guzzle installed?");
+                }
             }
-            $guzzlepromisesfunctions = $composer->getConfig()->get('vendor-dir') . '/guzzlehttp/promises/src/functions_include.php';
+            $guzzlepromisesfunctions = "$vendorDir/guzzlehttp/promises/src/functions_include.php";
             if (!file_exists($guzzlepromisesfunctions)) {
-                throw new FileNotFoundException("$guzzlepromisesfunctions not found, is guzzle installed?");
+                $guzzlepromisesfunctions = "$homeDir/guzzlehttp/promises/src/functions_include.php";
+                if (!file_exists($guzzlepromisesfunctions)) {
+                    throw new FileNotFoundException("$guzzlepromisesfunctions not found, is guzzle installed?");
+                }
             }
             require $guzzlefunctions;
             require $guzzlepsr7functions;
