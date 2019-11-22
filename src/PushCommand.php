@@ -42,6 +42,7 @@ class PushCommand extends BaseCommand
             new InputOption('ignore-dirs', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, '<error>DEPRECATED</error> Directories to ignore when creating the zip'),
             new InputOption('ignore-by-git-attributes', null, InputOption::VALUE_NONE, 'Ignore .gitattrbutes export-ignore directories when creating the zip'),
             new InputOption('ignore-by-composer', null, InputOption::VALUE_NONE, 'Ignore composer.json archive-exclude files and directories when creating the zip'),
+            new InputOption('src-type', null, InputArgument::OPTIONAL, 'The source type (git/svn,...) pushed on composer on distant Nexus repository'),
             new InputOption('src-url', null, InputArgument::OPTIONAL, 'The source url pushed on composer on distant Nexus repository'),
             new InputOption('src-ref', null, InputArgument::OPTIONAL, 'The source reference pushed on composer on distant Nexus repository')
           ])
@@ -73,6 +74,7 @@ EOT
             '-',
             $packageName . '-' . $input->getArgument('version')
         ));
+        $sourceType = $input->hasArgument('src-type') ? $input->getArgument('src-type') : null;
         $sourceUrl = $input->hasArgument('src-url') ? $input->getArgument('src-url') : null;
         $sourceReference = $input->hasArgument('src-ref') ? $input->getArgument('src-ref') : null;
 
@@ -108,6 +110,7 @@ EOT
             $this->sendFile(
                 $url,
                 $fileName,
+                $sourceType,
                 $sourceUrl,
                 $sourceReference,
                 $input->getOption('username'),
@@ -167,6 +170,7 @@ EOT
      *
      * @param string $url URL to send the file to
      * @param string $filePath path to the file to send
+     * @param string|null $sourceType the type which will be added as source in composer
      * @param string|null $sourceUrl the Url which will be added as source in composer
      * @param string|null $sourceReference the reference which will be added as source in composer
      * @param string|null $username
@@ -178,13 +182,14 @@ EOT
     private function sendFile(
         $url,
         $filePath,
+        $sourceType = null,
         $sourceUrl = null,
         $sourceReference = null,
         $username = null,
         $password = null
     ) {
         if (!empty($username) && !empty($password)) {
-            $this->postFile($url, $filePath, $sourceUrl, $sourceReference, $username, $password);
+            $this->postFile($url, $filePath, $sourceType, $sourceUrl, $sourceReference, $username, $password);
             return;
         } else {
             $credentials = [];
@@ -228,7 +233,7 @@ EOT
                               true,
                               IOInterface::VERY_VERBOSE
                           );
-                        $this->postFile($url, $filePath, $sourceUrl, $sourceReference);
+                        $this->postFile($url, $filePath, $sourceType, $sourceUrl, $sourceReference);
                     } else {
                         $this->getIO()
                           ->write(
@@ -239,6 +244,7 @@ EOT
                         $this->postFile(
                             $url,
                             $filePath,
+                            $sourceType,
                             $sourceUrl,
                             $sourceReference,
                             $credential['username'],
@@ -285,6 +291,7 @@ EOT
      *
      * @param $url
      * @param $file
+     * @param $sourceType
      * @param $sourceUrl
      * @param $sourceReference
      * @param $username
@@ -292,17 +299,21 @@ EOT
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function postFile($url, $file, $sourceUrl = null, $sourceReference = null, $username = null, $password = null)
+    private function postFile($url, $file, $sourceType = null, $sourceUrl = null, $sourceReference = null, $username = null, $password = null)
     {
         $options = [
             'debug' => $this->getIO()->isVeryVerbose(),
         ];
-        if (!empty($sourceUrl) && !empty($sourceReference)) {
+        if (!empty($sourceType) && !empty($sourceUrl) && !empty($sourceReference)) {
             $options['multipart'] = [
                 [
                     'Content-Type' => 'multipart/form-data',
                     'name' => 'package',
                     'contents' => fopen($file, 'r')
+                ],
+                [
+                    'name' => 'src-type',
+                    'contents' => $sourceType
                 ],
                 [
                     'name' => 'src-url',
