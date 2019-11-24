@@ -74,10 +74,9 @@ EOT
             '-',
             $packageName . '-' . $input->getArgument('version')
         ));
-        $sourceType = $input->hasArgument('src-type') ? $input->getArgument('src-type') : null;
-        $sourceUrl = $input->hasArgument('src-url') ? $input->getArgument('src-url') : null;
-        $sourceReference = $input->hasArgument('src-ref') ? $input->getArgument('src-ref') : null;
-
+        $sourceType = $input->getOption('src-type');
+        $sourceUrl = $input->getOption('src-url');
+        $sourceReference = $input->getOption('src-ref');
         $ignoredDirectories = $this->getIgnores($input);
         $this->getIO()
             ->write(
@@ -307,7 +306,7 @@ EOT
         if (!empty($sourceType) && !empty($sourceUrl) && !empty($sourceReference)) {
             $options['multipart'] = [
                 [
-                    'Content-Type' => 'multipart/form-data',
+                    'Content-Type' => 'application/zip',
                     'name' => 'package',
                     'contents' => fopen($file, 'r')
                 ],
