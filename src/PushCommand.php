@@ -355,21 +355,21 @@ EOT
             // Require the guzzle functions manually.
             $guzzlefunctions = "$vendorDir/guzzlehttp/guzzle/src/functions_include.php";
             if (!file_exists($guzzlefunctions)) {
-                $guzzlefunctions = "$homeDir/guzzlehttp/guzzle/src/functions_include.php";
+                $guzzlefunctions = "$homeDir/vendor/guzzlehttp/guzzle/src/functions_include.php";
                 if (!file_exists($guzzlefunctions)) {
                     throw new FileNotFoundException("$guzzlefunctions not found, is guzzle installed?");
                 }
             }
             $guzzlepsr7functions = "$vendorDir/guzzlehttp/psr7/src/functions_include.php";
             if (!file_exists($guzzlepsr7functions)) {
-                $guzzlepsr7functions = "$homeDir/guzzlehttp/psr7/src/functions_include.php";
+                $guzzlepsr7functions = "$homeDir/vendor/guzzlehttp/psr7/src/functions_include.php";
                 if (!file_exists($guzzlepsr7functions)) {
                     throw new FileNotFoundException("$guzzlepsr7functions not found, is guzzle installed?");
                 }
             }
             $guzzlepromisesfunctions = "$vendorDir/guzzlehttp/promises/src/functions_include.php";
             if (!file_exists($guzzlepromisesfunctions)) {
-                $guzzlepromisesfunctions = "$homeDir/guzzlehttp/promises/src/functions_include.php";
+                $guzzlepromisesfunctions = "$homeDir/vendor/guzzlehttp/promises/src/functions_include.php";
                 if (!file_exists($guzzlepromisesfunctions)) {
                     throw new FileNotFoundException("$guzzlepromisesfunctions not found, is guzzle installed?");
                 }
