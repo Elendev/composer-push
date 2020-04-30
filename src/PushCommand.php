@@ -4,6 +4,7 @@
 namespace Elendev\NexusComposerPush;
 
 use Composer\Command\BaseCommand;
+use Composer\Config;
 use Composer\IO\IOInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -21,6 +22,16 @@ class PushCommand extends BaseCommand
      * @var \GuzzleHttp\ClientInterface
      */
     private $client;
+
+    /**
+     * @var string
+     */
+    private $projectVendorDir;
+
+    /**
+     * @var string
+     */
+    private $globalVendorDir;
 
     protected function configure()
     {
@@ -308,28 +319,12 @@ EOT
     {
         if (empty($this->client)) {
             // https://github.com/composer/composer/issues/5998
-            $composer = $this->getComposer(true);
-            $autoload = $composer->getConfig()
-                    ->get('vendor-dir') . '/autoload.php';
-
-            // Show an error if the file wasn't found in the current project.
-            if (!file_exists($autoload)) {
-                throw new FileNotFoundException("vendor/autoload.php not found, did you run composer install?");
-            }
+            $autoload = $this->getVendorFile('/autoload.php');
 
             // Require the guzzle functions manually.
-            $guzzlefunctions = $composer->getConfig()->get('vendor-dir') . '/guzzlehttp/guzzle/src/functions_include.php';
-            if (!file_exists($guzzlefunctions)) {
-                throw new FileNotFoundException("$guzzlefunctions not found, is guzzle installed?");
-            }
-            $guzzlepsr7functions = $composer->getConfig()->get('vendor-dir') . '/guzzlehttp/psr7/src/functions_include.php';
-            if (!file_exists($guzzlepsr7functions)) {
-                throw new FileNotFoundException("$guzzlepsr7functions not found, is guzzle installed?");
-            }
-            $guzzlepromisesfunctions = $composer->getConfig()->get('vendor-dir') . '/guzzlehttp/promises/src/functions_include.php';
-            if (!file_exists($guzzlepromisesfunctions)) {
-                throw new FileNotFoundException("$guzzlepromisesfunctions not found, is guzzle installed?");
-            }
+            $guzzlefunctions         = $this->getVendorFile('/guzzlehttp/guzzle/src/functions_include.php');
+            $guzzlepsr7functions     = $this->getVendorFile('/guzzlehttp/psr7/src/functions_include.php');
+            $guzzlepromisesfunctions = $this->getVendorFile('/guzzlehttp/promises/src/functions_include.php');
             require $guzzlefunctions;
             require $guzzlepsr7functions;
             require $guzzlepromisesfunctions;
@@ -338,6 +333,55 @@ EOT
             $this->client = new Client();
         }
         return $this->client;
+    }
+
+    private function getProjectVendorDir()
+    {
+        if (!$this->projectVendorDir) {
+            $composer  = $this->getComposer(true);
+            $vendorDir = $composer->getConfig()->get('vendor-dir');
+
+            // Show an error if the file wasn't found in the current project.
+            if (file_exists($vendorDir . '/elendev/nexus-composer-push')) {
+                $this->projectVendorDir = $vendorDir;
+            }
+        }
+
+        return $this->projectVendorDir;
+    }
+
+    private function getGlobalVendorDir()
+    {
+        if (!$this->globalVendorDir) {
+            $composer  = $this->getComposer(true);
+            $vendorDir = $composer->getConfig()->get('data-dir') . '/' . $composer->getConfig()->get('vendor-dir', Config::RELATIVE_PATHS);
+
+            // Show an error if the file wasn't found in the current project.
+            if (file_exists($vendorDir . '/elendev/nexus-composer-push')) {
+                $this->globalVendorDir = $vendorDir;
+            }
+        }
+
+        return $this->globalVendorDir;
+    }
+
+    private function getVendorFile($file)
+    {
+        try {
+            $vendorDir  = $this->getProjectVendorDir();
+            $vendorFile = $vendorDir . $file;
+            if (!file_exists($vendorFile)) {
+                throw new FileNotFoundException("$file not found, is guzzle installed?");
+            }
+        } catch (FileNotFoundException $e) {
+            $vendorDir = $this->getGlobalVendorDir();
+            $vendorFile = $vendorDir . $file;
+            if (!file_exists($vendorFile)) {
+                throw new FileNotFoundException("$file not found, is guzzle installed?");
+            }
+        }
+
+        return $vendorFile;
     }
 
     /**
