@@ -42,6 +42,7 @@ class PushCommand extends BaseCommand
             new InputArgument('version', InputArgument::REQUIRED, 'The package version'),
             new InputOption('name', null, InputArgument::OPTIONAL, 'Name of the package (if different from the composer.json file)'),
             new InputOption('url', null, InputArgument::OPTIONAL, 'URL to the distant Nexus repository'),
+            new InputOption('repo-type', null, InputArgument::OPTIONAL, 'repository to save , if you want to place development version and production version in different Nexus repository'),
             new InputOption(
                 'username',
                 null,
@@ -102,6 +103,7 @@ EOT
 
             $url = $this->generateUrl(
                 $input->getOption('url'),
+                $input->getOption('repo-type'),
                 $packageName,
                 $input->getArgument('version')
             );
@@ -134,12 +136,13 @@ EOT
 
     /**
      * @param string $url
+     * @param string $repoType
      * @param string $name
      * @param string $version
      *
      * @return string URL to the repository
      */
-    private function generateUrl($url, $name, $version)
+    private function generateUrl($url, $repoType, $name, $version)
     {
         if (empty($url)) {
             $url = $this->getNexusExtra('url');
@@ -147,6 +150,18 @@ EOT
             if (empty($url)) {
                 throw new InvalidArgumentException('The option --url is required or has to be provided as an extra argument in composer.json');
             }
+        }
+
+        if(!empty($repoType)){
+            $repoLists = $this->getNexusExtra('repo-list');
+            if(!is_array($repoLists)){
+                throw new InvalidArgumentException('The option --repo-type is offered or but repo-list is in composer.json is not array');
+            }
+            if(!isset($repoLists[$repoType])){
+                throw new InvalidArgumentException('The option --repo-type is is offered but the value is not key of repo-list in composer.json');
+            }
+
+            $url = rtrim($url,"/").'/'.$repoLists[$repoType];
         }
 
         if (empty($name)) {
