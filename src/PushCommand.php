@@ -42,7 +42,7 @@ class PushCommand extends BaseCommand
             new InputArgument('version', InputArgument::REQUIRED, 'The package version'),
             new InputOption('name', null, InputArgument::OPTIONAL, 'Name of the package (if different from the composer.json file)'),
             new InputOption('url', null, InputArgument::OPTIONAL, 'URL to the distant Nexus repository'),
-            new InputOption('repo-type', null, InputArgument::OPTIONAL, 'repository to save , if you want to place development version and production version in different Nexus repository'),
+            new InputOption('repo-type', null, InputArgument::OPTIONAL, 'repository to save, use this parameter if you want to place development version and production version in different repository on one Nexus'),
             new InputOption(
                 'username',
                 null,
@@ -155,10 +155,10 @@ EOT
         if(!empty($repoType)){
             $repoLists = $this->getNexusExtra('repo-list');
             if(!is_array($repoLists)){
-                throw new InvalidArgumentException('The option --repo-type is offered or but repo-list is in composer.json is not array');
+                throw new InvalidArgumentException('The option --repo-type is offered but "repo-list" in composer.json is not array');
             }
             if(!isset($repoLists[$repoType])){
-                throw new InvalidArgumentException('The option --repo-type is is offered but the value is not key of repo-list in composer.json');
+                throw new InvalidArgumentException('The option --repo-type is offered but "repo-list" in composer.json does not contain key with the given value');
             }
 
             $url = rtrim($url,"/").'/'.$repoLists[$repoType];
