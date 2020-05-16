@@ -114,7 +114,6 @@ EOT
 
             $url = $this->generateUrl(
                 $input->getOption('url'),
-                $input->getOption(self::REPOSITORY),
                 $packageName,
                 $input->getArgument('version')
             );
@@ -147,13 +146,12 @@ EOT
 
     /**
      * @param string $url
-     * @param string $repository
      * @param string $name
      * @param string $version
      *
      * @return string URL to the repository
      */
-    private function generateUrl($url, $repository, $name, $version)
+    private function generateUrl($url, $name, $version)
     {
         if (empty($url)) {
             $url = $this->getNexusExtra('url');
