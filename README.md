@@ -13,7 +13,7 @@ Many of the options are optional since they can be added directly to the `compos
  # At the root of your directory
  $ composer nexus-push [--name=<package name>] \
    [--url=<URL to the composer nexus repository>] \
-   [--repo-type=<the repository name you want to save, use this parameter if you want to place development version and production version in different repository on one Nexus >] \
+   [--repository=<the repository you want to save, use this parameter if you want to control which repository to upload to by command-line parameter>] \
    [--username=USERNAME] \
    [--password=PASSWORD] \
    [--ignore=test.php]\
@@ -30,16 +30,12 @@ Many of the options are optional since they can be added directly to the `compos
  ```
 
 ## Configuration
-It's possible to add some configurations inside the `composer.json` file:
+It's possible to add some configurations inside the `composer.json` file
 ```json
 {
     "extra": {
         "nexus-push": {
             "url": "http://localhost:8081/repository/",
-            "repo-list": {
-                "dev": "composer-devs",
-                "prod": "composer"
-            },
             "username": "admin",
             "password": "admin123",
             "ignore-by-git-attributes": true,
@@ -51,5 +47,39 @@ It's possible to add some configurations inside the `composer.json` file:
     }
 }
 ```
+Above configuration may be called unique repository configuration format, as you can only configue one nexus repository in composer.json.  
+
+In practice, for security reasons, different versions of component code, such as production and development, often apply different deployment policy, such as disable redeploy for the production version and allow redeploy for the development version, so they need to be stored in different nexus repositories.
+For versions later than 0.1.5, the command-line parameter -- repository is introduced to meet this requirement. To enable the -- repository parameter, the composer.json file needs to be in the following format:
+```json
+{
+	"extra": {
+		"nexus-push": [{
+			"name": "prod",
+			"url": "http://localhost:8081/repository/composer-releases",
+			"username": "admin",
+			"password": "admin123",
+			"ignore-by-git-attributes": true,
+			"ignore": [
+				"test.php",
+				"foo/"
+			]
+		}, {
+			"name": "dev",
+			"url": "http://localhost:8081/repository/composer-devs",
+			"username": "admin",
+			"password": "admin123",
+			"ignore-by-git-attributes": true,
+			"ignore": [
+				"test.php",
+				"foo/"
+			]
+		}]
+	}
+}
+```
+Above configuration may be called unique repository configuration format.  
+
+The new version continues to support parsing the old unique repository configuration format, but remember that you cannot use the -- repository command line argument.  
 
 The `username` and `password` can be specified in the `auth.json` file on a per-user basis with the [authentication mechanism provided by Composer](https://getcomposer.org/doc/articles/http-basic-authentication.md).
