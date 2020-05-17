@@ -443,6 +443,8 @@ EOT
                 if(empty($this->nexusPushConfig)){
                     throw new InvalidArgumentException('The value of option --repository match no nexus-push configuration, pleash check');
                 }
+
+                return $this->nexusPushConfig;
             }
         }catch (\Exception $e){
             $this->getIO()
@@ -451,7 +453,7 @@ EOT
         }
     }
 
-    public function checkNexusPushValid(InputInterface $input){
+    private function checkNexusPushValid(InputInterface $input){
         $repository = $input->getOption(self::REPOSITORY);
         $extras = $this->getComposer(true)->getPackage()->getExtra();
         if(empty($repository) && !empty($extras['nexus-push'][0])){
