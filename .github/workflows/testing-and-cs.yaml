@@ -1,0 +1,30 @@
+name: Testing and Code Quality
+on: push, pull_request
+
+jobs:
+  install:
+    name: Composer install
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Composer install'
+        uses: docker://composer:1.9
+
+  tests:
+    name: PHPUnit testing
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: 'PHPUnit testing'
+        uses: docker://php:7.2-cli
+        with:
+          args: vendor/bin/phpunit tests
+
+  cs:
+    name: Code Sniffing
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: 'PHPUnit testing'
+        uses: docker://php:7.2-cli
+        with:
+          args: vendor/bin/php-cs-fixer fix src --dry-run
