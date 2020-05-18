@@ -443,9 +443,10 @@ EOT
                 if(empty($this->nexusPushConfig)){
                     throw new InvalidArgumentException('The value of option --repository match no nexus-push configuration, pleash check');
                 }
-
-                return $this->nexusPushConfig;
             }
+
+            return $this->nexusPushConfig;
+
         }catch (\Exception $e){
             $this->getIO()
                 ->write($e->getMessage());
