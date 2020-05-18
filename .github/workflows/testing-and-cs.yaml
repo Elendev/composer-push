@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: 'Composer install'
         uses: docker://composer:1.9
+        with:
+          args: install
 
   tests:
     name: PHPUnit testing
