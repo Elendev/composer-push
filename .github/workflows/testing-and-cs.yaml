@@ -20,4 +20,4 @@ jobs:
       - name: 'Code sniffing'
         uses: ./.github/actions/php-7.2
         with:
-          args: vendor/bin/php-cs-fixer fix src --dry-run
+          args: "vendor/bin/php-cs-fixer fix src --dry-run"
