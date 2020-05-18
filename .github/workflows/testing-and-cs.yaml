@@ -14,10 +14,10 @@ jobs:
         with:
           args: install
       - name: 'PHPUnit testing'
-        uses: docker://php:7.2-cli
+        uses: ./.github/actions/php-7.2
         with:
           args: vendor/bin/phpunit tests
-      - name: 'Code testing'
-        uses: docker://php:7.2-cli
+      - name: 'Code sniffing'
+        uses: ./.github/actions/php-7.2
         with:
           args: vendor/bin/php-cs-fixer fix src --dry-run
