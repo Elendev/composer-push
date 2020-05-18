@@ -29,8 +29,7 @@ class ZipArchiver
         $subDirectory = null,
         $ignores = [],
         $io = null
-    )
-    {
+    ) {
         if (empty($io)) {
             $io = new NullIO();
         }

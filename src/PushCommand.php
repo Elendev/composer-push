@@ -59,7 +59,7 @@ class PushCommand extends BaseCommand
 The <info>nexus-push</info> command uses the archive command to create a ZIP
 archive and send it to the configured (or given) nexus repository.
 EOT
-            )
+          )
         ;
     }
 
@@ -98,7 +98,7 @@ EOT
                 $subdirectory,
                 $ignoredDirectories,
                 $this->getIO()
-          );
+            );
 
             $url = $this->generateUrl(
                 $input->getOption('url'),
@@ -117,7 +117,7 @@ EOT
                 $fileName,
                 $input->getOption('username'),
                 $input->getOption('password')
-          );
+            );
 
             $this->getIO()
               ->write('Archive correctly pushed to the Nexus server');
@@ -250,7 +250,7 @@ EOT
                             $filePath,
                             $credential['username'],
                             $credential['password']
-                      );
+                        );
                     }
 
                     return;
@@ -507,7 +507,7 @@ EOT
         if (array_key_exists('archive', $jsonContents) && array_key_exists('exclude', $jsonContents['archive'])) {
             foreach ($jsonContents['archive']['exclude'] as $exclude) {
                 $ignores[] = trim($exclude, DIRECTORY_SEPARATOR);
-            }   
+            }
         }
 
         return $ignores;
