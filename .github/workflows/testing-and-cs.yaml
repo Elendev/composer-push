@@ -2,18 +2,13 @@ name: Testing and Code Quality
 on: [push, pull_request]
 
 jobs:
-  checkout:
-    name: Checkout
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
 
   install:
     name: Composer install
     runs-on: ubuntu-latest
-    needs: checkout
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - name: 'Composer install'
         uses: docker://composer:1.9
         with:
