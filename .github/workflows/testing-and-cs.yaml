@@ -19,12 +19,11 @@ jobs:
 
   PHPUnit:
     name: PHPUnit testing
-    needs: PHPCS
     runs-on: ubuntu-latest
     strategy:
       matrix:
         composer: [1.8, 1.9]
-        php: [7.2, 7.3, 7.4]
+        php: [5.6, 7.0, 7.1, 7.2, 7.3, 7.4]
         symfony: [^3.0, ^4.0, ^5.0]
     steps:
       - name: Checkout repository
