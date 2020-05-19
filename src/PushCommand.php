@@ -14,7 +14,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
-use Elendev\NexusComposerPush\InvalidConfigException;
 
 class PushCommand extends BaseCommand
 {
@@ -415,52 +414,52 @@ EOT
     /**
      * @param InputInterface $input
      */
-    private function parseNexusExtra(InputInterface $input){
-        try{
+    private function parseNexusExtra(InputInterface $input)
+    {
+        try {
             $this->checkNexusPushValid($input);
 
             $repository = $input->getOption(self::REPOSITORY);
             $extras = $this->getComposer(true)->getPackage()->getExtra();
-            if(empty($repository)){
+            if (empty($repository)) {
                 // configurations in composer.json support Only upload to unique repository
-                if(!empty($extras['nexus-push'])){
+                if (!empty($extras['nexus-push'])) {
                     $this->nexusPushConfig = $extras['nexus-push'];
                 }
-
-            }else{
+            } else {
                 // configurations in composer.json support upload to multi repository
-                foreach ($extras['nexus-push'] as $key=> $nexusPushConfigItem){
-                    if(empty($nexusPushConfigItem[self::PUSH_CFG_NAME])){
+                foreach ($extras['nexus-push'] as $key=> $nexusPushConfigItem) {
+                    if (empty($nexusPushConfigItem[self::PUSH_CFG_NAME])) {
                         $fmt = 'The nexus-push configuration array in composer.json with index {%s} need provide value for key "%s"';
-                        $exceptionMsg = sprintf($fmt,$key,self::PUSH_CFG_NAME);
+                        $exceptionMsg = sprintf($fmt, $key, self::PUSH_CFG_NAME);
                         throw new InvalidConfigException($exceptionMsg);
                     }
-                    if($nexusPushConfigItem[self::PUSH_CFG_NAME] ==$repository){
+                    if ($nexusPushConfigItem[self::PUSH_CFG_NAME] ==$repository) {
                         $this->nexusPushConfig = $nexusPushConfigItem;
                     }
                 }
 
-                if(empty($this->nexusPushConfig)){
+                if (empty($this->nexusPushConfig)) {
                     throw new InvalidArgumentException('The value of option --repository match no nexus-push configuration, pleash check');
                 }
             }
 
             return $this->nexusPushConfig;
-
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $this->getIO()
                 ->write($e->getMessage());
             throw $e;
         }
     }
 
-    private function checkNexusPushValid(InputInterface $input){
+    private function checkNexusPushValid(InputInterface $input)
+    {
         $repository = $input->getOption(self::REPOSITORY);
         $extras = $this->getComposer(true)->getPackage()->getExtra();
-        if(empty($repository) && !empty($extras['nexus-push'][0])){
+        if (empty($repository) && !empty($extras['nexus-push'][0])) {
             throw new InvalidArgumentException('As configurations in composer.json support upload to multi repository, the option --repository is required');
         }
-        if(!empty($repository) && empty($extras['nexus-push'][0])){
+        if (!empty($repository) && empty($extras['nexus-push'][0])) {
             throw new InvalidConfigException('the option --repository is offered, but configurations in composer.json doesn\'t support upload to multi repository, please check');
         }
     }
@@ -567,7 +566,7 @@ EOT
         }
 
         $path = getcwd() . '/composer.json';
-        
+
         $contents = file_get_contents($path);
         $jsonContents = json_decode($contents, true);
         $ignores = [];
