@@ -37,3 +37,7 @@ jobs:
       - run: composer require "symfony/finder:${{ matrix.symfony }}" "symfony/filesystem:${{ matrix.symfony }}"
       - run: composer install
       - run: vendor/bin/phpunit tests
+
+  BuildDone:
+    name: PHP full build
+    needs: [PHPCS, PHPUnit]
