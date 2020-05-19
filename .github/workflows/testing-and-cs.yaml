@@ -1,10 +1,9 @@
 name: Testing and Code Quality
-on: [push, pull_request]
+on: push
 
 jobs:
-
-  install:
-    name: Composer install, test and code sniff
+  PHPCS:
+    name: Code Sniffing
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -13,11 +12,36 @@ jobs:
         uses: docker://composer:1.9
         with:
           args: install
-      - name: 'PHPUnit testing'
-        uses: ./.github/actions/php-7.2
-        with:
-          args: vendor/bin/phpunit tests
       - name: 'Code sniffing'
-        uses: ./.github/actions/php-7.2
+        uses: docker://php:7.2-cli
         with:
           args: "vendor/bin/php-cs-fixer fix src --dry-run"
+
+  PHPUnit:
+    name: PHPUnit testing
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [7.2, 7.3, 7.4]
+        composer: [1.6, 1.7, 1.8, 1.9, 1.10]
+        symfony: [^3.0, ^4.0, ^5.0]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: 'Unit testing'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer:${{ matrix.composer }}
+      - run: composer require "symfony/finder:${{ matrix.symfony }}" "symfony/filesystem:${{ matrix.symfony }}"
+      - run: composer install
+      - run: vendor/bin/phpunit tests
+
+  BuildDone:
+    name: PHP full build
+    needs: [PHPCS, PHPUnit]
+    runs-on: ubuntu-latest
+    steps:
+      - run: "echo build done"
+
