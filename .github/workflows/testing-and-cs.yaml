@@ -1,0 +1,23 @@
+name: Testing and Code Quality
+on: [push, pull_request]
+
+jobs:
+
+  install:
+    name: Composer install, test and code sniff
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: 'Composer install'
+        uses: docker://composer:1.9
+        with:
+          args: install
+      - name: 'PHPUnit testing'
+        uses: ./.github/actions/php-7.2
+        with:
+          args: vendor/bin/phpunit tests
+      - name: 'Code sniffing'
+        uses: ./.github/actions/php-7.2
+        with:
+          args: "vendor/bin/php-cs-fixer fix src --dry-run"
