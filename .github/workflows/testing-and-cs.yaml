@@ -33,6 +33,5 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: composer:${{ matrix.composer }}
-        run:
-          - composer install
-          - vendor/bin/phpunit tests
+      - run: composer install
+      - run: vendor/bin/phpunit tests
