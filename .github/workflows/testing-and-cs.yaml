@@ -2,9 +2,26 @@ name: Testing and Code Quality
 on: [push, pull_request]
 
 jobs:
+  CodeSniffing:
+    name: Code Sniffing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: 'Composer install'
+        uses: docker://composer:1.9
+        with:
+          args: install
+      - name: 'Code sniffing'
+        uses: docker://php:7.2-cli
+        with:
+          args: "vendor/bin/php-cs-fixer fix src --dry-run"
 
-  install:
-    name: Composer install, test and code sniff
+  PHPUnit:
+    name: PHPUnit testing
+    strategy:
+      matrix:
+        phpVersion: [7.2, 7.3, 7.4]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -14,7 +31,7 @@ jobs:
         with:
           args: install
       - name: 'PHPUnit testing'
-        uses: ./.github/actions/php-7.2
+        uses: ./.github/actions/php-${{matrix.phpVersion}}
         with:
           args: vendor/bin/phpunit tests
       - name: 'Code sniffing'
