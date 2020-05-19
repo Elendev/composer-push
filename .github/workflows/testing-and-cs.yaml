@@ -2,7 +2,7 @@ name: Testing and Code Quality
 on: [push, pull_request]
 
 jobs:
-  CodeSniffing:
+  PHPCS:
     name: Code Sniffing
     runs-on: ubuntu-latest
     steps:
@@ -19,6 +19,7 @@ jobs:
 
   PHPUnit:
     name: PHPUnit testing
+    needs: PHPCS
     strategy:
       matrix:
         phpVersion: [7.2, 7.3, 7.4]
