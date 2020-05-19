@@ -12,7 +12,7 @@
         "psr-4": {"Elendev\\NexusComposerPush\\": "src/"}
     },
     "require": {
-        "php": ">=7.2 <=7.4",
+        "php": ">=7.2 <7.5",
         "ext-curl": "*",
         "ext-zip": "*",
         "composer-plugin-api": "^1.1",
