@@ -21,7 +21,9 @@ jobs:
     name: PHPUnit testing
     needs: PHPCS
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        php: [7.2, 7.3, 7.4]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -32,4 +34,4 @@ jobs:
       - name: 'PHPUnit testing'
         uses: ./.github/actions/php-7.2
         with:
-          args: vendor/bin/phpunit tests
+          args: vendor/bin/phpunit tests ${{ matrix.php }}
