@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use Elendev\NexusComposerPush\InvalidConfigException;
 
 class PushCommand extends BaseCommand
 {
@@ -33,6 +34,14 @@ class PushCommand extends BaseCommand
      */
     private $globalVendorDir;
 
+    /**
+     * @var
+     */
+    private $nexusPushConfig = array();
+
+    const REPOSITORY = 'repository';
+    const PUSH_CFG_NAME = 'name';
+
     protected function configure()
     {
         $this
@@ -42,6 +51,7 @@ class PushCommand extends BaseCommand
             new InputArgument('version', InputArgument::REQUIRED, 'The package version'),
             new InputOption('name', null, InputArgument::OPTIONAL, 'Name of the package (if different from the composer.json file)'),
             new InputOption('url', null, InputArgument::OPTIONAL, 'URL to the distant Nexus repository'),
+            new InputOption(self::REPOSITORY, null, InputArgument::OPTIONAL, 'which repository to save, use this parameter if you want to place development version and production version in different repository'),
             new InputOption(
                 'username',
                 null,
@@ -99,6 +109,8 @@ EOT
                 $ignoredDirectories,
                 $this->getIO()
           );
+
+            $this->parseNexusExtra($input);
 
             $url = $this->generateUrl(
                 $input->getOption('url'),
@@ -401,7 +413,64 @@ EOT
     }
 
     /**
+     * @param InputInterface $input
+     */
+    private function parseNexusExtra(InputInterface $input){
+        try{
+            $this->checkNexusPushValid($input);
+
+            $repository = $input->getOption(self::REPOSITORY);
+            $extras = $this->getComposer(true)->getPackage()->getExtra();
+            if(empty($repository)){
+                // configurations in composer.json support Only upload to unique repository
+                if(!empty($extras['nexus-push'])){
+                    $this->nexusPushConfig = $extras['nexus-push'];
+                }
+
+            }else{
+                // configurations in composer.json support upload to multi repository
+                foreach ($extras['nexus-push'] as $key=> $nexusPushConfigItem){
+                    if(empty($nexusPushConfigItem[self::PUSH_CFG_NAME])){
+                        $fmt = 'The nexus-push configuration array in composer.json with index {%s} need provide value for key "%s"';
+                        $exceptionMsg = sprintf($fmt,$key,self::PUSH_CFG_NAME);
+                        throw new InvalidConfigException($exceptionMsg);
+                    }
+                    if($nexusPushConfigItem[self::PUSH_CFG_NAME] ==$repository){
+                        $this->nexusPushConfig = $nexusPushConfigItem;
+                    }
+                }
+
+                if(empty($this->nexusPushConfig)){
+                    throw new InvalidArgumentException('The value of option --repository match no nexus-push configuration, pleash check');
+                }
+            }
+
+            return $this->nexusPushConfig;
+
+        }catch (\Exception $e){
+            $this->getIO()
+                ->write($e->getMessage());
+            throw $e;
+        }
+    }
+
+    private function checkNexusPushValid(InputInterface $input){
+        $repository = $input->getOption(self::REPOSITORY);
+        $extras = $this->getComposer(true)->getPackage()->getExtra();
+        if(empty($repository) && !empty($extras['nexus-push'][0])){
+            throw new InvalidArgumentException('As configurations in composer.json support upload to multi repository, the option --repository is required');
+        }
+        if(!empty($repository) && empty($extras['nexus-push'][0])){
+            throw new InvalidConfigException('the option --repository is offered, but configurations in composer.json doesn\'t support upload to multi repository, please check');
+        }
+    }
+
+    /**
      * Get the Nexus extra values if available
+
+     * Important notice:
+     * the method parseNexusExtra has to be called to initialize $this->nexusPushConfig
+     * before being able to call this method
      *
      * @param $parameter
      * @param null $default
@@ -410,10 +479,8 @@ EOT
      */
     private function getNexusExtra($parameter, $default = null)
     {
-        $extras = $this->getComposer(true)->getPackage()->getExtra();
-
-        if (!empty($extras['nexus-push'][$parameter])) {
-            return $extras['nexus-push'][$parameter];
+        if (!empty($this->nexusPushConfig[$parameter])) {
+            return $this->nexusPushConfig[$parameter];
         } else {
             return $default;
         }
