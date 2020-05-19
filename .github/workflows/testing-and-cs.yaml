@@ -41,3 +41,6 @@ jobs:
   BuildDone:
     name: PHP full build
     needs: [PHPCS, PHPUnit]
+    steps:
+      - run: "echo build done"
+
