@@ -23,15 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        composer: [1.8, 1.9]
         php: [7.2, 7.3, 7.4]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: 'Composer install'
-        uses: docker://composer:1.9
+        uses: docker://composer:${{ matrix.composer }}
         with:
           args: install
       - name: 'PHPUnit testing'
-        uses: ./.github/actions/php-7.2
+        uses: ./.github/actions/php-${{ matrix.php }}
         with:
-          args: vendor/bin/phpunit tests ${{ matrix.php }}
+          args: vendor/bin/phpunit tests
