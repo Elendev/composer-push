@@ -28,11 +28,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: 'Composer install'
-        uses: docker://composer:${{ matrix.composer }}
+      - name: 'Unit testing'
+        uses: shivammathur/setup-php@v2
         with:
-          args: install
-      - name: 'PHPUnit testing'
-        uses: ./.github/actions/php-${{ matrix.php }}
-        with:
-          args: vendor/bin/phpunit tests
+          php-version: ${{ matrix.php }}
+          tools: composer:${{ matrix.composer }}
+        run:
+          - composer install
+          - vendor/bin/phpunit tests
