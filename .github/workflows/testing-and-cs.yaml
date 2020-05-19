@@ -20,10 +20,10 @@ jobs:
   PHPUnit:
     name: PHPUnit testing
     needs: PHPCS
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         php: [7.2, 7.3, 7.4]
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
