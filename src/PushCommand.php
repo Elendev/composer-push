@@ -467,6 +467,10 @@ EOT
 
     /**
      * Get the Nexus extra values if available
+
+     * Important notice:
+     * the method parseNexusExtra has to be called to initialize $this->nexusPushConfig
+     * before being able to call this method
      *
      * @param $parameter
      * @param null $default
