@@ -22,7 +22,7 @@ jobs:
     needs: PHPCS
     strategy:
       matrix:
-        phpVersion: [./.github/actions/php-7.2, ./.github/actions/php-7.3, ./.github/actions/php-7.4]
+        php: [7.2, 7.3, 7.4]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -32,6 +32,6 @@ jobs:
         with:
           args: install
       - name: 'PHPUnit testing'
-        uses: ${{ matrix.phpVersion }}
+        uses: ./.github/actions/php-${{ matrix.php }}
         with:
           args: vendor/bin/phpunit tests
