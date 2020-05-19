@@ -41,6 +41,7 @@ jobs:
   BuildDone:
     name: PHP full build
     needs: [PHPCS, PHPUnit]
+    runs-on: ubuntu-latest
     steps:
       - run: "echo build done"
 
