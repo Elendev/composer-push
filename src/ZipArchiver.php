@@ -27,8 +27,8 @@ class ZipArchiver
         $source,
         $destination,
         $subDirectory = null,
-	$ignores = [],
-	$keepDotFiles = false,
+        $ignores = [],
+        $keepDotFiles = false,
         $io = null
     ) {
         if (empty($io)) {

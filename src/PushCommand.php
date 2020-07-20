@@ -130,7 +130,7 @@ EOT
                 $fileName,
                 $input->getOption('username'),
                 $input->getOption('password')
-          );
+            );
 
             $this->getIO()
               ->write('Archive correctly pushed to the Nexus server');
@@ -263,7 +263,7 @@ EOT
                             $filePath,
                             $credential['username'],
                             $credential['password']
-                      );
+                        );
                     }
 
                     return;
@@ -503,11 +503,11 @@ EOT
         $gitAttrIgnores = $this->getGitAttributesExportIgnores($input);
         $composerJsonIgnores = $this->getComposerJsonArchiveExcludeIgnores($input);
 
-        if ( ! $input->getOption('keep-vendor') ){
-        $defaultIgnores = ['vendor/'];
-    } else {
-        $defaultIgnores = [];
-    }
+        if (! $input->getOption('keep-vendor')) {
+            $defaultIgnores = ['vendor/'];
+        } else {
+            $defaultIgnores = [];
+        }
 
         $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $composerJsonIgnores, $defaultIgnores);
         return array_unique($ignore);
