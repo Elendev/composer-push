@@ -87,8 +87,8 @@ EOT
                 getcwd(),
                 $fileName,
                 $subdirectory,
-		$ignoredDirectories,
-		($input && $input->getOption('keep-dot-files')),
+                $ignoredDirectories,
+                ($input && $input->getOption('keep-dot-files')),
                 $this->getIO()
           );
 
@@ -311,7 +311,7 @@ EOT
     {
         if (empty($this->client)) {
             // https://github.com/composer/composer/issues/5998
-	    $composer = $this->getComposer(true);
+        $composer = $this->getComposer(true);
             $vendorDir = $composer->getConfig()->get('vendor-dir');
             $autoload = $vendorDir . '/autoload.php';
 
@@ -392,13 +392,13 @@ EOT
         $optionalIgnore = $input->getOption('ignore');
         $composerIgnores = $this->getNexusExtra('ignore', []);
         $gitAttrIgnores = $this->getGitAttributesExportIgnores($input);
-	$composerJsonIgnores = $this->getComposerJsonArchiveExcludeIgnores($input);
+        $composerJsonIgnores = $this->getComposerJsonArchiveExcludeIgnores($input);
 
-	if ( ! $input->getOption('keep-vendor') ){
-		$defaultIgnores = ['vendor/'];
-	} else {
-		$defaultIgnores = [];
-	}
+        if ( ! $input->getOption('keep-vendor') ){
+        $defaultIgnores = ['vendor/'];
+    } else {
+        $defaultIgnores = [];
+    }
 
         $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $composerJsonIgnores, $defaultIgnores);
         return array_unique($ignore);
