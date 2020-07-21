@@ -28,6 +28,7 @@ class ZipArchiver
         $destination,
         $subDirectory = null,
         $ignores = [],
+        $keepDotFiles = false,
         $io = null
     ) {
         if (empty($io)) {
@@ -43,7 +44,7 @@ class ZipArchiver
         $finder = new Finder();
         $fileSystem = new Filesystem();
 
-        $finder->in($source)->ignoreVCS(true);
+        $finder->in($source)->ignoreVCS(true)->ignoreDotFiles(!$keepDotFiles);
 
         foreach ($ignores as $ignore) {
             $finder->notPath($ignore);
