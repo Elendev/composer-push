@@ -1,5 +1,5 @@
 name: Testing and Code Quality
-on: push
+on: [push, pull_request]
 
 jobs:
   PHPCS:
