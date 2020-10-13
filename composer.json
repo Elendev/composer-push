@@ -15,7 +15,7 @@
         "php": ">=7.2 <7.5",
         "ext-curl": "*",
         "ext-zip": "*",
-        "composer-plugin-api": "^1.1",
+        "composer-plugin-api": "^1.1|^2.0",
         "guzzlehttp/guzzle": "^6.0|^7.0",
         "symfony/finder": "^3.0|^4.0|^5.0",
         "symfony/filesystem": "^3.0|^4.0|^5.0"
