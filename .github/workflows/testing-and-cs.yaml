@@ -34,6 +34,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: composer:${{ matrix.composer }}
+      - run: composer install
       - run: composer require "symfony/finder:${{ matrix.symfony }}" "symfony/filesystem:${{ matrix.symfony }}"
       - run: composer update
       - run: vendor/bin/phpunit tests
