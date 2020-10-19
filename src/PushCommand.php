@@ -94,6 +94,8 @@ EOT
             $packageName . '-' . $input->getArgument('version')
         ));
 
+        $this->parseNexusExtra($input);
+
         $ignoredDirectories = $this->getIgnores($input);
         $this->getIO()
             ->write(
@@ -110,8 +112,6 @@ EOT
                 $ignoredDirectories,
                 $this->getIO()
             );
-
-            $this->parseNexusExtra($input);
 
             $url = $this->generateUrl(
                 $input->getOption('url'),
