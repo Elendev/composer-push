@@ -4,6 +4,7 @@
 namespace Elendev\NexusComposerPush;
 
 use Composer\Command\BaseCommand;
+use Composer\Config;
 use Composer\IO\IOInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -22,6 +23,24 @@ class PushCommand extends BaseCommand
      */
     private $client;
 
+    /**
+     * @var string
+     */
+    private $projectVendorDir;
+
+    /**
+     * @var string
+     */
+    private $globalVendorDir;
+
+    /**
+     * @var
+     */
+    private $nexusPushConfig = array();
+
+    const REPOSITORY = 'repository';
+    const PUSH_CFG_NAME = 'name';
+
     protected function configure()
     {
         $this
@@ -31,6 +50,7 @@ class PushCommand extends BaseCommand
             new InputArgument('version', InputArgument::REQUIRED, 'The package version'),
             new InputOption('name', null, InputArgument::OPTIONAL, 'Name of the package (if different from the composer.json file)'),
             new InputOption('url', null, InputArgument::OPTIONAL, 'URL to the distant Nexus repository'),
+            new InputOption(self::REPOSITORY, null, InputArgument::OPTIONAL, 'which repository to save, use this parameter if you want to place development version and production version in different repository'),
             new InputOption(
                 'username',
                 null,
@@ -45,13 +65,15 @@ class PushCommand extends BaseCommand
             new InputOption('src-type', null, InputArgument::OPTIONAL, 'The source type (git/svn,...) pushed on composer on distant Nexus repository'),
             new InputOption('src-url', null, InputArgument::OPTIONAL, 'The source url pushed on composer on distant Nexus repository'),
             new InputOption('src-ref', null, InputArgument::OPTIONAL, 'The source reference pushed on composer on distant Nexus repository')
+            new InputOption('keep-vendor', null, InputOption::VALUE_NONE, 'Keep vendor directory when creating zip'),
+            new InputOption('keep-dot-files', null, InputOption::VALUE_NONE, 'Keep dots files/dirs when creating zip')
           ])
           ->setHelp(
               <<<EOT
 The <info>nexus-push</info> command uses the archive command to create a ZIP
 archive and send it to the configured (or given) nexus repository.
 EOT
-            )
+          )
         ;
     }
 
@@ -74,9 +96,13 @@ EOT
             '-',
             $packageName . '-' . $input->getArgument('version')
         ));
+
+        $this->parseNexusExtra($input);
+        
         $sourceType = $input->getOption('src-type');
         $sourceUrl = $input->getOption('src-url');
         $sourceReference = $input->getOption('src-ref');
+
         $ignoredDirectories = $this->getIgnores($input);
         $this->getIO()
             ->write(
@@ -92,7 +118,7 @@ EOT
                 $subdirectory,
                 $ignoredDirectories,
                 $this->getIO()
-          );
+            );
 
             $url = $this->generateUrl(
                 $input->getOption('url'),
@@ -114,7 +140,7 @@ EOT
                 $sourceReference,
                 $input->getOption('username'),
                 $input->getOption('password')
-          );
+            );
 
             $this->getIO()
               ->write('Archive correctly pushed to the Nexus server');
@@ -248,7 +274,7 @@ EOT
                             $sourceReference,
                             $credential['username'],
                             $credential['password']
-                      );
+                        );
                     }
 
                     return;
@@ -342,38 +368,13 @@ EOT
     {
         if (empty($this->client)) {
             // https://github.com/composer/composer/issues/5998
-            $composer = $this->getComposer(true);
-            $homeDir = $composer->getConfig()->get('home');
-            $vendorDir = $composer->getConfig()->get('vendor-dir');
-            $autoload = "$vendorDir/autoload.php";
-
-            // Show an error if the file wasn't found in the current project.
-            if (!file_exists($autoload)) {
-                throw new FileNotFoundException("vendor/autoload.php not found, did you run composer install?");
-            }
+            $autoload = $this->getVendorFile('/autoload.php');
 
             // Require the guzzle functions manually.
-            $guzzlefunctions = "$vendorDir/guzzlehttp/guzzle/src/functions_include.php";
-            if (!file_exists($guzzlefunctions)) {
-                $guzzlefunctions = "$homeDir/vendor/guzzlehttp/guzzle/src/functions_include.php";
-                if (!file_exists($guzzlefunctions)) {
-                    throw new FileNotFoundException("$guzzlefunctions not found, is guzzle installed?");
-                }
-            }
-            $guzzlepsr7functions = "$vendorDir/guzzlehttp/psr7/src/functions_include.php";
-            if (!file_exists($guzzlepsr7functions)) {
-                $guzzlepsr7functions = "$homeDir/vendor/guzzlehttp/psr7/src/functions_include.php";
-                if (!file_exists($guzzlepsr7functions)) {
-                    throw new FileNotFoundException("$guzzlepsr7functions not found, is guzzle installed?");
-                }
-            }
-            $guzzlepromisesfunctions = "$vendorDir/guzzlehttp/promises/src/functions_include.php";
-            if (!file_exists($guzzlepromisesfunctions)) {
-                $guzzlepromisesfunctions = "$homeDir/vendor/guzzlehttp/promises/src/functions_include.php";
-                if (!file_exists($guzzlepromisesfunctions)) {
-                    throw new FileNotFoundException("$guzzlepromisesfunctions not found, is guzzle installed?");
-                }
-            }
+            $guzzlefunctions         = $this->getVendorFile('/guzzlehttp/guzzle/src/functions_include.php');
+            $guzzlepsr7functions     = $this->getVendorFile('/guzzlehttp/psr7/src/functions_include.php');
+            $guzzlepromisesfunctions = $this->getVendorFile('/guzzlehttp/promises/src/functions_include.php');
+
             require $guzzlefunctions;
             require $guzzlepsr7functions;
             require $guzzlepromisesfunctions;
@@ -382,6 +383,55 @@ EOT
             $this->client = new Client();
         }
         return $this->client;
+    }
+
+    private function getProjectVendorDir()
+    {
+        if (!$this->projectVendorDir) {
+            $composer  = $this->getComposer(true);
+            $vendorDir = $composer->getConfig()->get('vendor-dir');
+
+            // Show an error if the file wasn't found in the current project.
+            if (file_exists($vendorDir . '/elendev/nexus-composer-push')) {
+                $this->projectVendorDir = $vendorDir;
+            }
+        }
+
+        return $this->projectVendorDir;
+    }
+
+    private function getGlobalVendorDir()
+    {
+        if (!$this->globalVendorDir) {
+            $composer  = $this->getComposer(true);
+            $vendorDir = $composer->getConfig()->get('data-dir') . '/' . $composer->getConfig()->get('vendor-dir', Config::RELATIVE_PATHS);
+
+            // Show an error if the file wasn't found in the current project.
+            if (file_exists($vendorDir . '/elendev/nexus-composer-push')) {
+                $this->globalVendorDir = $vendorDir;
+            }
+        }
+
+        return $this->globalVendorDir;
+    }
+
+    private function getVendorFile($file)
+    {
+        try {
+            $vendorDir  = $this->getProjectVendorDir();
+            $vendorFile = $vendorDir . $file;
+            if (!file_exists($vendorFile)) {
+                throw new FileNotFoundException("$file not found, is guzzle installed?");
+            }
+        } catch (FileNotFoundException $e) {
+            $vendorDir = $this->getGlobalVendorDir();
+            $vendorFile = $vendorDir . $file;
+            if (!file_exists($vendorFile)) {
+                throw new FileNotFoundException("$file not found, is guzzle installed?");
+            }
+        }
+
+        return $vendorFile;
     }
 
     /**
@@ -401,7 +451,64 @@ EOT
     }
 
     /**
+     * @param InputInterface $input
+     */
+    private function parseNexusExtra(InputInterface $input)
+    {
+        try {
+            $this->checkNexusPushValid($input);
+
+            $repository = $input->getOption(self::REPOSITORY);
+            $extras = $this->getComposer(true)->getPackage()->getExtra();
+            if (empty($repository)) {
+                // configurations in composer.json support Only upload to unique repository
+                if (!empty($extras['nexus-push'])) {
+                    $this->nexusPushConfig = $extras['nexus-push'];
+                }
+            } else {
+                // configurations in composer.json support upload to multi repository
+                foreach ($extras['nexus-push'] as $key=> $nexusPushConfigItem) {
+                    if (empty($nexusPushConfigItem[self::PUSH_CFG_NAME])) {
+                        $fmt = 'The nexus-push configuration array in composer.json with index {%s} need provide value for key "%s"';
+                        $exceptionMsg = sprintf($fmt, $key, self::PUSH_CFG_NAME);
+                        throw new InvalidConfigException($exceptionMsg);
+                    }
+                    if ($nexusPushConfigItem[self::PUSH_CFG_NAME] ==$repository) {
+                        $this->nexusPushConfig = $nexusPushConfigItem;
+                    }
+                }
+
+                if (empty($this->nexusPushConfig)) {
+                    throw new InvalidArgumentException('The value of option --repository match no nexus-push configuration, pleash check');
+                }
+            }
+
+            return $this->nexusPushConfig;
+        } catch (\Exception $e) {
+            $this->getIO()
+                ->write($e->getMessage());
+            throw $e;
+        }
+    }
+
+    private function checkNexusPushValid(InputInterface $input)
+    {
+        $repository = $input->getOption(self::REPOSITORY);
+        $extras = $this->getComposer(true)->getPackage()->getExtra();
+        if (empty($repository) && !empty($extras['nexus-push'][0])) {
+            throw new InvalidArgumentException('As configurations in composer.json support upload to multi repository, the option --repository is required');
+        }
+        if (!empty($repository) && empty($extras['nexus-push'][0])) {
+            throw new InvalidConfigException('the option --repository is offered, but configurations in composer.json doesn\'t support upload to multi repository, please check');
+        }
+    }
+
+    /**
      * Get the Nexus extra values if available
+
+     * Important notice:
+     * the method parseNexusExtra has to be called to initialize $this->nexusPushConfig
+     * before being able to call this method
      *
      * @param $parameter
      * @param null $default
@@ -410,10 +517,8 @@ EOT
      */
     private function getNexusExtra($parameter, $default = null)
     {
-        $extras = $this->getComposer(true)->getPackage()->getExtra();
-
-        if (!empty($extras['nexus-push'][$parameter])) {
-            return $extras['nexus-push'][$parameter];
+        if (!empty($this->nexusPushConfig[$parameter])) {
+            return $this->nexusPushConfig[$parameter];
         } else {
             return $default;
         }
@@ -434,7 +539,12 @@ EOT
         $composerIgnores = $this->getNexusExtra('ignore', []);
         $gitAttrIgnores = $this->getGitAttributesExportIgnores($input);
         $composerJsonIgnores = $this->getComposerJsonArchiveExcludeIgnores($input);
-        $defaultIgnores = ['vendor/'];
+
+        if (! $input->getOption('keep-vendor')) {
+            $defaultIgnores = ['vendor/'];
+        } else {
+            $defaultIgnores = [];
+        }
 
         $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $composerJsonIgnores, $defaultIgnores);
         return array_unique($ignore);
@@ -500,14 +610,14 @@ EOT
         }
 
         $path = getcwd() . '/composer.json';
-        
+
         $contents = file_get_contents($path);
         $jsonContents = json_decode($contents, true);
         $ignores = [];
         if (array_key_exists('archive', $jsonContents) && array_key_exists('exclude', $jsonContents['archive'])) {
             foreach ($jsonContents['archive']['exclude'] as $exclude) {
                 $ignores[] = trim($exclude, DIRECTORY_SEPARATOR);
-            }   
+            }
         }
 
         return $ignores;
