@@ -87,6 +87,16 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $sourceType = $input->getOption('src-type');
+        $sourceUrl = $input->getOption('src-url');
+        $sourceReference = $input->getOption('src-ref');
+        // we will check to see if any of these are available, and if so, and not all of them we will inform the user
+        if (!empty($sourceType) || !empty($sourceUrl) || !empty($sourceReference)) {
+            if (empty($sourceType) || empty($sourceUrl) || empty($sourceReference)) {
+                throw new InvalidArgumentException('Source reference parameters are not complete, you should set all three parameters (type, url, ref) or none of them, please check');
+            }
+        }
+
         $fileName = tempnam(sys_get_temp_dir(), 'nexus-push') . '.zip';
 
         $packageName = $this->getPackageName($input);
@@ -98,10 +108,6 @@ EOT
         ));
 
         $this->parseNexusExtra($input);
-        
-        $sourceType = $input->getOption('src-type');
-        $sourceUrl = $input->getOption('src-url');
-        $sourceReference = $input->getOption('src-ref');
 
         $ignoredDirectories = $this->getIgnores($input);
         $this->getIO()
@@ -479,7 +485,7 @@ EOT
                 }
 
                 if (empty($this->nexusPushConfig)) {
-                    throw new InvalidArgumentException('The value of option --repository match no nexus-push configuration, pleash check');
+                    throw new InvalidArgumentException('The value of option --repository match no nexus-push configuration, please check');
                 }
             }
 
