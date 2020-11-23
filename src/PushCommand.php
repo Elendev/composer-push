@@ -62,6 +62,9 @@ class PushCommand extends BaseCommand
             new InputOption('ignore-dirs', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, '<error>DEPRECATED</error> Directories to ignore when creating the zip'),
             new InputOption('ignore-by-git-attributes', null, InputOption::VALUE_NONE, 'Ignore .gitattrbutes export-ignore directories when creating the zip'),
             new InputOption('ignore-by-composer', null, InputOption::VALUE_NONE, 'Ignore composer.json archive-exclude files and directories when creating the zip'),
+            new InputOption('src-type', null, InputArgument::OPTIONAL, 'The source type (git/svn,...) pushed on composer on distant Nexus repository'),
+            new InputOption('src-url', null, InputArgument::OPTIONAL, 'The source url pushed on composer on distant Nexus repository'),
+            new InputOption('src-ref', null, InputArgument::OPTIONAL, 'The source reference pushed on composer on distant Nexus repository'),
             new InputOption('keep-vendor', null, InputOption::VALUE_NONE, 'Keep vendor directory when creating zip'),
             new InputOption('keep-dot-files', null, InputOption::VALUE_NONE, 'Keep dots files/dirs when creating zip')
           ])
@@ -84,6 +87,16 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $sourceType = $input->getOption('src-type');
+        $sourceUrl = $input->getOption('src-url');
+        $sourceReference = $input->getOption('src-ref');
+        // we will check to see if any of these are available, and if so, and not all of them we will inform the user
+        if (!empty($sourceType) || !empty($sourceUrl) || !empty($sourceReference)) {
+            if (empty($sourceType) || empty($sourceUrl) || empty($sourceReference)) {
+                throw new InvalidArgumentException('Source reference parameters are not complete, you should set all three parameters (type, url, ref) or none of them, please check');
+            }
+        }
+
         $fileName = tempnam(sys_get_temp_dir(), 'nexus-push') . '.zip';
 
         $packageName = $this->getPackageName($input);
@@ -128,6 +141,9 @@ EOT
             $this->sendFile(
                 $url,
                 $fileName,
+                $sourceType,
+                $sourceUrl,
+                $sourceReference,
                 $input->getOption('username'),
                 $input->getOption('password')
             );
@@ -185,6 +201,9 @@ EOT
      *
      * @param string $url URL to send the file to
      * @param string $filePath path to the file to send
+     * @param string|null $sourceType the type which will be added as source in composer
+     * @param string|null $sourceUrl the Url which will be added as source in composer
+     * @param string|null $sourceReference the reference which will be added as source in composer
      * @param string|null $username
      * @param string|null $password
      *
@@ -194,11 +213,14 @@ EOT
     private function sendFile(
         $url,
         $filePath,
+        $sourceType = null,
+        $sourceUrl = null,
+        $sourceReference = null,
         $username = null,
         $password = null
     ) {
         if (!empty($username) && !empty($password)) {
-            $this->postFile($url, $filePath, $username, $password);
+            $this->postFile($url, $filePath, $sourceType, $sourceUrl, $sourceReference, $username, $password);
             return;
         } else {
             $credentials = [];
@@ -234,14 +256,6 @@ EOT
                       IOInterface::VERY_VERBOSE
                   );
 
-                $options = [
-                  'body' => fopen($filePath, 'r'),
-                ];
-
-                if (!empty($credential)) {
-                    $options['auth'] = $credential;
-                }
-
                 try {
                     if (empty($credential) || empty($credential['username']) || empty($credential['password'])) {
                         $this->getIO()
@@ -250,7 +264,7 @@ EOT
                               true,
                               IOInterface::VERY_VERBOSE
                           );
-                        $this->postFile($url, $filePath);
+                        $this->postFile($url, $filePath, $sourceType, $sourceUrl, $sourceReference);
                     } else {
                         $this->getIO()
                           ->write(
@@ -261,6 +275,9 @@ EOT
                         $this->postFile(
                             $url,
                             $filePath,
+                            $sourceType,
+                            $sourceUrl,
+                            $sourceReference,
                             $credential['username'],
                             $credential['password']
                         );
@@ -305,17 +322,42 @@ EOT
      *
      * @param $url
      * @param $file
+     * @param $sourceType
+     * @param $sourceUrl
+     * @param $sourceReference
      * @param $username
      * @param $password
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function postFile($url, $file, $username = null, $password = null)
+    private function postFile($url, $file, $sourceType = null, $sourceUrl = null, $sourceReference = null, $username = null, $password = null)
     {
         $options = [
-            'body' => fopen($file, 'r'),
             'debug' => $this->getIO()->isVeryVerbose(),
         ];
+        if (!empty($sourceType) && !empty($sourceUrl) && !empty($sourceReference)) {
+            $options['multipart'] = [
+                [
+                    'Content-Type' => 'application/zip',
+                    'name' => 'package',
+                    'contents' => fopen($file, 'r')
+                ],
+                [
+                    'name' => 'src-type',
+                    'contents' => $sourceType
+                ],
+                [
+                    'name' => 'src-url',
+                    'contents' => $sourceUrl
+                ],
+                [
+                    'name' => 'src-ref',
+                    'contents' => $sourceReference
+                ]
+            ];
+        } else {
+            $options['body'] = fopen($file, 'r');
+        }
 
         if (!empty($username) && !empty($password)) {
             $options['auth'] = [$username, $password];
@@ -338,6 +380,7 @@ EOT
             $guzzlefunctions         = $this->getVendorFile('/guzzlehttp/guzzle/src/functions_include.php');
             $guzzlepsr7functions     = $this->getVendorFile('/guzzlehttp/psr7/src/functions_include.php');
             $guzzlepromisesfunctions = $this->getVendorFile('/guzzlehttp/promises/src/functions_include.php');
+
             require $guzzlefunctions;
             require $guzzlepsr7functions;
             require $guzzlepromisesfunctions;
@@ -442,7 +485,7 @@ EOT
                 }
 
                 if (empty($this->nexusPushConfig)) {
-                    throw new InvalidArgumentException('The value of option --repository match no nexus-push configuration, pleash check');
+                    throw new InvalidArgumentException('The value of option --repository match no nexus-push configuration, please check');
                 }
             }
 
