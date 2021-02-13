@@ -12,10 +12,6 @@ jobs:
         uses: docker://composer:1.9
         with:
           args: install
-      - name: 'Composer add code sniffer'
-        uses: docker://composer:1.9
-        with:
-          args: "require --dev friendsofphp/php-cs-fixer ^2.14"
       - name: 'Code sniffing'
         uses: docker://php:7.2-cli
         with:
