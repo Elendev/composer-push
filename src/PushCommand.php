@@ -433,7 +433,7 @@ EOT
             $vendorDir = $this->getGlobalVendorDir();
             $vendorFile = $vendorDir . $file;
             if (!file_exists($vendorFile)) {
-                throw new FileNotFoundException("$file not found, is guzzle installed?");
+                throw new FileNotFoundException("$file not found, is guzzle globally installed?");
             }
         }
 
