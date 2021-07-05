@@ -1,4 +1,6 @@
 <?php
+namespace Elendev\NexusComposerPush;
+
 if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     $loader = require_once dirname(__DIR__) . '/vendor/autoload.php';
     if ($loader !== true) {
@@ -6,8 +8,6 @@ if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
         $loader->register(false);
     }
 }
-
-namespace Elendev\NexusComposerPush;
 
 use Composer\Command\BaseCommand;
 use Composer\Config;
