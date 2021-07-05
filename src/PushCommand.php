@@ -375,15 +375,6 @@ EOT
         if (empty($this->client)) {
             // https://github.com/composer/composer/issues/5998
             $autoload = $this->getVendorFile('/autoload.php');
-
-            // Require the guzzle functions manually.
-            $guzzlefunctions         = $this->getVendorFile('/guzzlehttp/guzzle/src/functions_include.php');
-            $guzzlepsr7functions     = $this->getVendorFile('/guzzlehttp/psr7/src/functions_include.php');
-            $guzzlepromisesfunctions = $this->getVendorFile('/guzzlehttp/promises/src/functions_include.php');
-
-            require $guzzlefunctions;
-            require $guzzlepsr7functions;
-            require $guzzlepromisesfunctions;
             require $autoload;
 
             $this->client = new Client();
