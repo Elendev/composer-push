@@ -1,5 +1,11 @@
 <?php
-
+if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
+    $loader = require_once dirname(__DIR__) . '/vendor/autoload.php';
+    if ($loader !== true) {
+        spl_autoload_unregister([$loader, 'loadClass']);
+        $loader->register(false);
+    }
+}
 
 namespace Elendev\NexusComposerPush;
 
@@ -22,16 +28,6 @@ class PushCommand extends BaseCommand
      * @var \GuzzleHttp\ClientInterface
      */
     private $client;
-
-    /**
-     * @var string
-     */
-    private $projectVendorDir;
-
-    /**
-     * @var string
-     */
-    private $globalVendorDir;
 
     /**
      * @var
@@ -373,62 +369,9 @@ EOT
     private function getClient()
     {
         if (empty($this->client)) {
-            // https://github.com/composer/composer/issues/5998
-            $autoload = $this->getVendorFile('/autoload.php');
-            require $autoload;
-
             $this->client = new Client();
         }
         return $this->client;
-    }
-
-    private function getProjectVendorDir()
-    {
-        if (!$this->projectVendorDir) {
-            $composer  = $this->getComposer(true);
-            $vendorDir = $composer->getConfig()->get('vendor-dir');
-
-            // Show an error if the file wasn't found in the current project.
-            if (file_exists($vendorDir . '/elendev/nexus-composer-push')) {
-                $this->projectVendorDir = $vendorDir;
-            }
-        }
-
-        return $this->projectVendorDir;
-    }
-
-    private function getGlobalVendorDir()
-    {
-        if (!$this->globalVendorDir) {
-            $composer  = $this->getComposer(true);
-            $vendorDir = $composer->getConfig()->get('home') . '/' . $composer->getConfig()->get('vendor-dir', Config::RELATIVE_PATHS);
-
-            // Show an error if the file wasn't found in the current project.
-            if (file_exists($vendorDir . '/elendev/nexus-composer-push')) {
-                $this->globalVendorDir = $vendorDir;
-            }
-        }
-
-        return $this->globalVendorDir;
-    }
-
-    private function getVendorFile($file)
-    {
-        try {
-            $vendorDir  = $this->getProjectVendorDir();
-            $vendorFile = $vendorDir . $file;
-            if (!file_exists($vendorFile)) {
-                throw new FileNotFoundException("$file not found, is guzzle installed?");
-            }
-        } catch (FileNotFoundException $e) {
-            $vendorDir = $this->getGlobalVendorDir();
-            $vendorFile = $vendorDir . $file;
-            if (!file_exists($vendorFile)) {
-                throw new FileNotFoundException("$file not found, is guzzle globally installed?");
-            }
-        }
-
-        return $vendorFile;
     }
 
     /**
