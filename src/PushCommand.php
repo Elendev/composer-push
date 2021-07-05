@@ -3,15 +3,19 @@ namespace Elendev\NexusComposerPush;
 
 if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     $loader = require_once dirname(__DIR__) . '/vendor/autoload.php';
-    if ($loader !== true) {
-        spl_autoload_unregister([$loader, 'loadClass']);
-        $loader->register(false);
-    }
+} elseif (file_exists(dirname(__DIR__) . '/../../autoload.php')) {
+    $loader = require_once dirname(__DIR__) . '/../../autoload.php';
+} else {
+    // error?
+}
+
+if (isset($loader) && $loader !== true) {
+    spl_autoload_unregister([$loader, 'loadClass']);
+    $loader->register(false);
 }
 
 use Composer\Command\BaseCommand;
 use Composer\Config;
-use Composer\IO\IOInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
