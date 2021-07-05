@@ -16,6 +16,7 @@ if (isset($loader) && $loader !== true) {
 
 use Composer\Command\BaseCommand;
 use Composer\Config;
+use Composer\IO\IOInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
