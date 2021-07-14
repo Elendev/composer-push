@@ -3,7 +3,6 @@
 
 namespace Elendev\NexusComposerPush\RepositoryProvider;
 
-
 use Composer\IO\IOInterface;
 use GuzzleHttp\Exception\ClientException;
 
@@ -80,10 +79,10 @@ class NexusProvider extends AbstractProvider
 
 
             if (preg_match(
-                    '{^(?:https?)://([^/]+)(?:/.*)?}',
-                    $url,
-                    $match
-                ) && $this->getIO()->hasAuthentication($match[1])) {
+                '{^(?:https?)://([^/]+)(?:/.*)?}',
+                $url,
+                $match
+            ) && $this->getIO()->hasAuthentication($match[1])) {
                 $auth = $this->getIO()->getAuthentication($match[1]);
                 $credentials['auth.json'] = [
                     'username' => $auth['username'],

@@ -3,7 +3,6 @@
 
 namespace Elendev\NexusComposerPush;
 
-
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,7 +32,8 @@ class Configuration
     const REPOSITORY = 'repository';
     const PUSH_CFG_NAME = 'name';
 
-    public function __construct(InputInterface $input, Composer $composer, IOInterface $io) {
+    public function __construct(InputInterface $input, Composer $composer, IOInterface $io)
+    {
         $this->input = $input;
         $this->composer = $composer;
         $this->io = $io;
@@ -46,7 +46,8 @@ class Configuration
      * @param null $default
      * @return mixed|null
      */
-    public function get($parameter, $default = null) {
+    public function get($parameter, $default = null)
+    {
         if (!empty($this->config[$parameter])) {
             return $this->config[$parameter];
         } else {
@@ -61,7 +62,8 @@ class Configuration
      *
      * @return string
      */
-    public function getPackageName() {
+    public function getPackageName()
+    {
         if ($this->input && $this->input->getOption('name')) {
             return $this->input->getOption('name');
         } else {
@@ -73,7 +75,8 @@ class Configuration
      * Return the repository URL, based on the configuration or the user input
      * @return string
      */
-    public function getUrl() {
+    public function getUrl()
+    {
         $url = $this->input->getOption('url');
 
         if (empty($url)) {
@@ -91,7 +94,8 @@ class Configuration
      * Return the package version
      * @return string
      */
-    public function getVersion() {
+    public function getVersion()
+    {
         return $this->input->getArgument('version');
     }
 
@@ -99,7 +103,8 @@ class Configuration
      * Return the source type
      * @return bool|string|string[]|null
      */
-    public function getSourceType() {
+    public function getSourceType()
+    {
         return $this->input->getOption('src-type');
     }
 
@@ -107,7 +112,8 @@ class Configuration
      * Return the source URL
      * @return bool|string|string[]|null
      */
-    public function getSourceUrl() {
+    public function getSourceUrl()
+    {
         return $this->input->getOption('src-url');
     }
 
@@ -115,7 +121,8 @@ class Configuration
      * Return the source reference
      * @return bool|string|string[]|null
      */
-    public function getSourceReference() {
+    public function getSourceReference()
+    {
         return $this->input->getOption('src-ref');
     }
 
@@ -123,7 +130,8 @@ class Configuration
      * Return the username given in parameters during call
      * @return string|null
      */
-    public function getOptionUsername() {
+    public function getOptionUsername()
+    {
         return $this->input->getOption('username');
     }
 
@@ -131,7 +139,8 @@ class Configuration
      * Return the password given in parameters during call
      * @return string|null
      */
-    public function getOptionPassword() {
+    public function getOptionPassword()
+    {
         return $this->input->getOption('password');
     }
 
@@ -279,5 +288,4 @@ class Configuration
             throw new InvalidConfigException('the option --repository is offered, but configurations in composer.json doesn\'t support upload to multi repository, please check');
         }
     }
-
 }

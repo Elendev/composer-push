@@ -3,7 +3,6 @@
 
 namespace Elendev\NexusComposerPush\RepositoryProvider;
 
-
 use Composer\IO\IOInterface;
 use Elendev\NexusComposerPush\Configuration;
 use GuzzleHttp\Client;
@@ -28,7 +27,8 @@ abstract class AbstractProvider
      */
     private IOInterface $io;
 
-    public function __construct(Configuration $configuration, IOInterface $io) {
+    public function __construct(Configuration $configuration, IOInterface $io)
+    {
         $this->configuration = $configuration;
         $this->io = $io;
     }
@@ -37,26 +37,28 @@ abstract class AbstractProvider
      * Generate the URL used for the provider
      * @return mixed
      */
-    public abstract function generateUrl();
+    abstract public function generateUrl();
 
     /**
      * Send the given file
      * @param $filePath
      * @return mixed
      */
-    public abstract function sendFile($filePath);
+    abstract public function sendFile($filePath);
 
     /**
      * @return Configuration
      */
-    protected function getConfiguration() {
+    protected function getConfiguration()
+    {
         return $this->configuration;
     }
 
     /**
      * @return IOInterface
      */
-    protected function getIO() {
+    protected function getIO()
+    {
         return $this->io;
     }
 
