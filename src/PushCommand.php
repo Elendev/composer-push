@@ -100,7 +100,7 @@ EOT
             }
         }
 
-        $fileName = tempnam(sys_get_temp_dir(), 'nexus-push') . '.zip';
+        $fileName = tempnam(sys_get_temp_dir(), 'composer-push') . '.zip';
 
         $this->configuration = new Configuration($input, $this->getComposer(true), $this->getIO());
 
@@ -134,7 +134,7 @@ EOT
 
             $this->getIO()
                 ->write(
-                    'Execute the Nexus Push for the URL ' . $provider->generateUrl() . '...',
+                    'Execute the push for the URL ' . $provider->getUrl() . '...',
                     true
                 );
 

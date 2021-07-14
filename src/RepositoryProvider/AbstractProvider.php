@@ -27,17 +27,18 @@ abstract class AbstractProvider
      */
     private IOInterface $io;
 
-    public function __construct(Configuration $configuration, IOInterface $io)
+    public function __construct(Configuration $configuration, IOInterface $io, Client $client = null)
     {
         $this->configuration = $configuration;
         $this->io = $io;
+        $this->client = $client;
     }
 
     /**
-     * Generate the URL used for the provider
+     * Get the URL used for the provider
      * @return mixed
      */
-    abstract public function generateUrl();
+    abstract public function getUrl();
 
     /**
      * Send the given file

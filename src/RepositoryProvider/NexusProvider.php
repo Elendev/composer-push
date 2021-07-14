@@ -15,7 +15,7 @@ class NexusProvider extends AbstractProvider
      *
      * @return string URL to the repository
      */
-    public function generateUrl()
+    public function getUrl()
     {
         $url = $this->getConfiguration()->getUrl();
         $name = $this->getConfiguration()->getPackageName();
@@ -56,7 +56,7 @@ class NexusProvider extends AbstractProvider
     public function sendFile(
         $filePath
     ) {
-        $url = $this->generateUrl();
+        $url = $this->getUrl();
 
         $sourceType = $this->getConfiguration()->getSourceType();
         $sourceUrl = $this->getConfiguration()->getSourceUrl();
