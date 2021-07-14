@@ -153,7 +153,8 @@ EOT
      * @param $type
      * @return AbstractProvider
      */
-    private function getProvider($type = null) {
+    private function getProvider($type = null)
+    {
         if (empty($type) && empty($type = $this->configuration->getType())) {
             $type = 'nexus';
         }

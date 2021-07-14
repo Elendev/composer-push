@@ -147,7 +147,8 @@ class Configuration
      * Type of repository. Default: nexus (lowercase)
      * @return string
      */
-    public function getType() {
+    public function getType()
+    {
         $type = $this->input->getOption('type');
 
         if (empty($type)) {
