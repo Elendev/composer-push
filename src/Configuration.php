@@ -70,6 +70,72 @@ class Configuration
     }
 
     /**
+     * Return the repository URL, based on the configuration or the user input
+     * @return string
+     */
+    public function getUrl() {
+        $url = $this->input->getOption('url');
+
+        if (empty($url)) {
+            $url = $this->get('url');
+
+            if (empty($url)) {
+                throw new \InvalidArgumentException('The option --url is required or has to be provided as an extra argument in composer.json');
+            }
+        }
+
+        return $url;
+    }
+
+    /**
+     * Return the package version
+     * @return string
+     */
+    public function getVersion() {
+        return $this->input->getArgument('version');
+    }
+
+    /**
+     * Return the source type
+     * @return bool|string|string[]|null
+     */
+    public function getSourceType() {
+        return $this->input->getOption('src-type');
+    }
+
+    /**
+     * Return the source URL
+     * @return bool|string|string[]|null
+     */
+    public function getSourceUrl() {
+        return $this->input->getOption('src-url');
+    }
+
+    /**
+     * Return the source reference
+     * @return bool|string|string[]|null
+     */
+    public function getSourceReference() {
+        return $this->input->getOption('src-ref');
+    }
+
+    /**
+     * Return the username given in parameters during call
+     * @return string|null
+     */
+    public function getOptionUsername() {
+        return $this->input->getOption('username');
+    }
+
+    /**
+     * Return the password given in parameters during call
+     * @return string|null
+     */
+    public function getOptionPassword() {
+        return $this->input->getOption('password');
+    }
+
+    /**
      * Fetch any directories or files to be excluded from zip creation
      *
      * @return array
