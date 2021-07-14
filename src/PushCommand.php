@@ -6,7 +6,7 @@ if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
 } elseif (file_exists(dirname(__DIR__) . '/../../autoload.php')) {
     $loader = require_once dirname(__DIR__) . '/../../autoload.php';
 } else {
-    // error?
+    trigger_error("autoload.php was not found", E_USER_WARNING);
 }
 
 if (isset($loader) && $loader !== true) {
