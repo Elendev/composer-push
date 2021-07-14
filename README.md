@@ -12,7 +12,8 @@ Many of the options are optional since they can be added directly to the `compos
 ```bash
  # At the root of your directory
  $ composer push [--name=<package name>] \
-   [--url=<URL to the composer nexus repository>] \
+   [--url=<URL to the composer repository>] \
+   [--type=<Type of repository, nexus by default>]
    [--repository=<the repository you want to save, use this parameter if you want to control which repository to upload to by command-line parameter>] \
    [--username=USERNAME] \
    [--password=PASSWORD] \
@@ -40,8 +41,9 @@ It's possible to add some configurations inside the `composer.json` file
 ```json
 {
     "extra": {
-        "nexus-push": {
+        "push": {
             "url": "http://localhost:8081/repository/composer",
+            "type": "nexus",
             "username": "admin",
             "password": "admin123",
             "ignore-by-git-attributes": true,
@@ -60,7 +62,7 @@ For versions later than 0.1.5, the command-line parameter -- repository is intro
 ```json
 {
     "extra": {
-        "nexus-push": [{
+        "push": [{
             "name": "prod",
             "url": "http://localhost:8081/repository/composer-releases",
             "username": "admin",

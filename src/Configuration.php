@@ -29,7 +29,6 @@ class Configuration
      */
     private $io;
 
-    const REPOSITORY = 'repository';
     const PUSH_CFG_NAME = 'name';
 
     public function __construct(InputInterface $input, Composer $composer, IOInterface $io)
@@ -145,6 +144,24 @@ class Configuration
     }
 
     /**
+     * Type of repository. Default: nexus (lowercase)
+     * @return string
+     */
+    public function getType() {
+        $type = $this->input->getOption('type');
+
+        if (empty($type)) {
+            $type = $this->get('type');
+        }
+
+        if (empty($type)) {
+            return 'nexus';
+        }
+
+        return $type;
+    }
+
+    /**
      * Fetch any directories or files to be excluded from zip creation
      *
      * @return array
@@ -249,18 +266,28 @@ class Configuration
     {
         $this->checkNexusPushValid($input, $composer);
 
-        $repository = $input->getOption(self::REPOSITORY);
+        $repository = $input->getOption(PushCommand::REPOSITORY);
         $extras = $composer->getPackage()->getExtra();
+
+        $extrasConfigurationKey = 'push';
+
+        if (empty($extras['push'])) {
+            if (!empty($extras['nexus-push'])) {
+                $extrasConfigurationKey = 'nexus-push';
+                $this->io->warning('Configuration under extra - nexus-push in composer.json is deprecated, please replace it by extra - push');
+            }
+        }
+
         if (empty($repository)) {
             // configurations in composer.json support Only upload to unique repository
-            if (!empty($extras['nexus-push'])) {
-                $this->nexusPushConfig = $extras['nexus-push'];
+            if (!empty($extras[$extrasConfigurationKey])) {
+                $this->nexusPushConfig = $extras[$extrasConfigurationKey];
             }
         } else {
             // configurations in composer.json support upload to multi repository
-            foreach ($extras['nexus-push'] as $key=> $nexusPushConfigItem) {
+            foreach ($extras[$extrasConfigurationKey] as $key=> $nexusPushConfigItem) {
                 if (empty($nexusPushConfigItem[self::PUSH_CFG_NAME])) {
-                    $fmt = 'The nexus-push configuration array in composer.json with index {%s} need provide value for key "%s"';
+                    $fmt = 'The push configuration array in composer.json with index {%s} need provide value for key "%s"';
                     $exceptionMsg = sprintf($fmt, $key, self::PUSH_CFG_NAME);
                     throw new InvalidConfigException($exceptionMsg);
                 }
@@ -270,7 +297,7 @@ class Configuration
             }
 
             if (empty($this->nexusPushConfig)) {
-                throw new \InvalidArgumentException('The value of option --repository match no nexus-push configuration, please check');
+                throw new \InvalidArgumentException('The value of option --repository match no push configuration, please check');
             }
         }
 
@@ -279,12 +306,12 @@ class Configuration
 
     private function checkNexusPushValid(InputInterface $input, Composer $composer)
     {
-        $repository = $input->getOption(self::REPOSITORY);
+        $repository = $input->getOption(PushCommand::REPOSITORY);
         $extras = $composer->getPackage()->getExtra();
-        if (empty($repository) && !empty($extras['nexus-push'][0])) {
+        if (empty($repository) && (!empty($extras['push'][0]) || !empty($extras['nexus-push'][0]))) {
             throw new \InvalidArgumentException('As configurations in composer.json support upload to multi repository, the option --repository is required');
         }
-        if (!empty($repository) && empty($extras['nexus-push'][0])) {
+        if (!empty($repository) && empty($extras['push'][0]) && empty($extras['nexus-push'][0])) {
             throw new InvalidConfigException('the option --repository is offered, but configurations in composer.json doesn\'t support upload to multi repository, please check');
         }
     }

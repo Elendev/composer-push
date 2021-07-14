@@ -15,25 +15,16 @@ if (isset($loader) && $loader !== true) {
 }
 
 use Composer\Command\BaseCommand;
-use Composer\Config;
 use Composer\IO\IOInterface;
-use Elendev\NexusComposerPush\RepositoryProvider\NexusProvider;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
+use Elendev\NexusComposerPush\RepositoryProvider\AbstractProvider;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class PushCommand extends BaseCommand
 {
-
-    /**
-     * @var \GuzzleHttp\ClientInterface
-     */
-    private $client;
 
     /**
      * @var Configuration
@@ -41,18 +32,22 @@ class PushCommand extends BaseCommand
     private $configuration;
 
     const REPOSITORY = 'repository';
-    const PUSH_CFG_NAME = 'name';
+
+    const PROVIDER_TYPES = [
+        'nexus' => 'Elendev\NexusComposerPush\RepositoryProvider\NexusProvider'
+    ];
 
     protected function configure()
     {
         $this
             ->setName('push')
             ->setAliases(['nexus-push']) // Deprecated, use push instead
-            ->setDescription('Initiate a push to a distant Nexus repository')
+            ->setDescription('Initiate a push to a distant repository')
             ->setDefinition([
                 new InputArgument('version', InputArgument::REQUIRED, 'The package version'),
                 new InputOption('name', null, InputArgument::OPTIONAL, 'Name of the package (if different from the composer.json file)'),
-                new InputOption('url', null, InputArgument::OPTIONAL, 'URL to the distant Nexus repository'),
+                new InputOption('url', null, InputArgument::OPTIONAL, 'URL to the distant repository'),
+                new InputOption('type', null, InputArgument::OPTIONAL, 'Type of the distant repository (default: nexus, available: [' . implode(', ', array_keys(self::PROVIDER_TYPES)) . '])'),
                 new InputOption(self::REPOSITORY, null, InputArgument::OPTIONAL, 'which repository to save, use this parameter if you want to place development version and production version in different repository'),
                 new InputOption(
                     'username',
@@ -130,7 +125,7 @@ EOT
                 $this->getIO()
             );
 
-            $provider = new NexusProvider($this->configuration, $this->getIO());
+            $provider = $this->getProvider();
 
             $this->getIO()
                 ->write(
@@ -151,5 +146,28 @@ EOT
                 );
             unlink($fileName);
         }
+    }
+
+    /**
+     * Return a provider given the type
+     * @param $type
+     * @return AbstractProvider
+     */
+    private function getProvider($type = null) {
+        if (empty($type) && empty($type = $this->configuration->getType())) {
+            $type = 'nexus';
+        }
+
+        if (!array_key_exists($type, self::PROVIDER_TYPES)) {
+            throw new \InvalidArgumentException("Provider of type $type does not exist");
+        }
+
+        $class = self::PROVIDER_TYPES[$type];
+
+        if (!class_exists($class)) {
+            throw new \RuntimeException("Provider of type $type: class $class not found");
+        }
+
+        return new $class($this->configuration, $this->getIO());
     }
 }
