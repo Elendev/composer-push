@@ -12,7 +12,7 @@ class Configuration
     /**
      * @var array config cache
      */
-    private $config;
+    private $config = null;
 
     /**
      * @var InputInterface
@@ -36,7 +36,6 @@ class Configuration
         $this->input = $input;
         $this->composer = $composer;
         $this->io = $io;
-        $this->config = $this->parseNexusExtra($input, $composer);
     }
 
     /**
@@ -47,6 +46,10 @@ class Configuration
      */
     public function get($parameter, $default = null)
     {
+        if ($this->config === null) {
+            $this->config = $this->parseNexusExtra($this->input, $this->composer);
+        }
+
         if (!empty($this->config[$parameter])) {
             return $this->config[$parameter];
         } else {
@@ -194,7 +197,7 @@ class Configuration
      */
     private function getDirectoriesToIgnore(InputInterface $input)
     {
-        $optionalIgnore = $input->getOption('ignore-dirs');
+        $optionalIgnore = $input->getOption('ignore-dirs') ?? [];
         $composerIgnores = $this->get('ignore-dirs', []);
 
         if (!empty($optionalIgnore)) {
@@ -246,15 +249,9 @@ class Configuration
             return [];
         }
 
-        $path = getcwd() . '/composer.json';
-
-        $contents = file_get_contents($path);
-        $jsonContents = json_decode($contents, true);
         $ignores = [];
-        if (array_key_exists('archive', $jsonContents) && array_key_exists('exclude', $jsonContents['archive'])) {
-            foreach ($jsonContents['archive']['exclude'] as $exclude) {
-                $ignores[] = trim($exclude, DIRECTORY_SEPARATOR);
-            }
+        foreach ($this->composer->getPackage()->getArchiveExcludes() as $exclude) {
+            $ignores[] = trim($exclude, DIRECTORY_SEPARATOR);
         }
 
         return $ignores;
@@ -282,7 +279,7 @@ class Configuration
         if (empty($repository)) {
             // configurations in composer.json support Only upload to unique repository
             if (!empty($extras[$extrasConfigurationKey])) {
-                $this->nexusPushConfig = $extras[$extrasConfigurationKey];
+                return $extras[$extrasConfigurationKey];
             }
         } else {
             // configurations in composer.json support upload to multi repository
@@ -293,7 +290,7 @@ class Configuration
                     throw new InvalidConfigException($exceptionMsg);
                 }
                 if ($nexusPushConfigItem[self::PUSH_CFG_NAME] ==$repository) {
-                    $this->nexusPushConfig = $nexusPushConfigItem;
+                    return $nexusPushConfigItem;
                 }
             }
 
@@ -302,7 +299,7 @@ class Configuration
             }
         }
 
-        return $this->nexusPushConfig;
+        return [];
     }
 
     private function checkNexusPushValid(InputInterface $input, Composer $composer)
