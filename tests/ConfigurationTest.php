@@ -91,8 +91,6 @@ class ConfigurationTest extends TestCase
         $this->assertEquals('push-username', $this->configuration->get('username'));
         $this->assertEquals('push-password', $this->configuration->get('password'));
 
-        // TODO test with multiple config
-
         $this->singleConfig = false;
         $this->repository = 'A';
 
