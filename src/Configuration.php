@@ -50,7 +50,7 @@ class Configuration
             $this->config = $this->parseNexusExtra($this->input, $this->composer);
         }
 
-        if (!empty($this->config[$parameter])) {
+        if (array_key_exists($parameter, $this->config) && $this->config[$parameter] !== null) {
             return $this->config[$parameter];
         } else {
             return $default;
@@ -155,14 +155,24 @@ class Configuration
         $type = $this->input->getOption('type');
 
         if (empty($type)) {
-            $type = $this->get('type');
-        }
-
-        if (empty($type)) {
-            return 'nexus';
+            $type = $this->get('type', 'nexus');
         }
 
         return $type;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getVerifySsl()
+    {
+        $verifySsl = $this->input->getOption('ssl-verify');
+
+        if ($verifySsl === null) {
+            $verifySsl = $this->get('ssl-verify', true);
+        }
+
+        return filter_var($verifySsl, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**

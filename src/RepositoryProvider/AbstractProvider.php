@@ -68,7 +68,9 @@ abstract class AbstractProvider
     protected function getClient()
     {
         if (empty($this->client)) {
-            $this->client = new Client();
+            $this->client = new Client([
+                'verify' => $this->configuration->getVerifySsl()
+            ]);
         }
         return $this->client;
     }

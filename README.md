@@ -23,6 +23,7 @@ Many of the options are optional since they can be added directly to the `compos
    [--src-type=<The type of repository used for source code: git, svn, ... which will be added to source tag of composer package>]\
    [--src-url=<URL of the source code repository which will be added to source tag of composer package>]\
    [--src-ref=<The reference to the current code version for this package which will be added to source tag of composer package>]\
+   [--ssl-verify=true/]\
    <version>
    
  # Example 
@@ -44,6 +45,7 @@ It's possible to add some configurations inside the `composer.json` file
         "push": {
             "url": "http://localhost:8081/repository/composer",
             "type": "nexus",
+            "ssl-verify": true,
             "username": "admin",
             "password": "admin123",
             "ignore-by-git-attributes": true,
