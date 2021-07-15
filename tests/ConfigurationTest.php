@@ -42,6 +42,9 @@ class ConfigurationTest extends TestCase
     private $configType;
     private $extraConfigType;
 
+    private $configVerifySsl;
+    private $extraVerifySsl;
+
     public function setUp(): void
     {
         $this->keepVendor = null;
@@ -55,6 +58,9 @@ class ConfigurationTest extends TestCase
 
         $this->configType = null;
         $this->extraConfigType = null;
+
+        $this->configVerifySsl = null;
+        $this->extraVerifySsl = null;
 
         $this->initGlobalConfiguration();
     }
@@ -83,6 +89,34 @@ class ConfigurationTest extends TestCase
         $this->initGlobalConfiguration();
 
         $this->assertEquals('https://example.com', $this->configuration->getUrl());
+    }
+
+    public function testGetVerifySsl()
+    {
+        $this->assertTrue($this->configuration->getVerifySsl());
+
+        $this->extraVerifySsl = false;
+        $this->initGlobalConfiguration();
+
+        $this->assertFalse($this->configuration->getVerifySsl());
+
+        $this->extraVerifySsl = null;
+        $this->configVerifySsl = false;
+        $this->initGlobalConfiguration();
+
+        $this->assertFalse($this->configuration->getVerifySsl());
+
+        $this->extraVerifySsl = true;
+        $this->configVerifySsl = false;
+        $this->initGlobalConfiguration();
+
+        $this->assertFalse($this->configuration->getVerifySsl());
+
+        $this->extraVerifySsl = 'true';
+        $this->configVerifySsl = 'false';
+        $this->initGlobalConfiguration();
+
+        $this->assertFalse($this->configuration->getVerifySsl());
     }
 
     public function testGet()
@@ -231,6 +265,8 @@ class ConfigurationTest extends TestCase
                     return $this->repository;
                 case 'type':
                     return $this->configType;
+                case 'ssl-verify':
+                    return $this->configVerifySsl;
             }
         });
 
@@ -266,6 +302,7 @@ class ConfigurationTest extends TestCase
                         "password" => "push-password",
                         "ignore" => $this->configIgnore,
                         "type" => $this->extraConfigType,
+                        "ssl-verify" => $this->extraVerifySsl,
                     ]
                 ];
             } else {

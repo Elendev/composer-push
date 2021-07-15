@@ -9,3 +9,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * `nexus-push` configuration in the `composer.json` file is **deprecated**, use `push` instead
     * Support of composer `<1.10` dropped, composer versions supported: `^1.10|^2.0`
     * Add options to support multiple repository types. Currently only `nexus` is supported.
+    * Add `ssl-verify` parameter in configuration
