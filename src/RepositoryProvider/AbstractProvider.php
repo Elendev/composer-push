@@ -6,8 +6,6 @@ namespace Elendev\NexusComposerPush\RepositoryProvider;
 use Composer\IO\IOInterface;
 use Elendev\NexusComposerPush\Configuration;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 abstract class AbstractProvider
@@ -20,12 +18,12 @@ abstract class AbstractProvider
     /**
      * @var Configuration
      */
-    private Configuration $configuration;
+    private $configuration;
 
     /**
      * @var IOInterface
      */
-    private IOInterface $io;
+    private $io;
 
     public function __construct(Configuration $configuration, IOInterface $io, Client $client = null)
     {

@@ -9,10 +9,6 @@ use GuzzleHttp\Exception\ClientException;
 class NexusProvider extends AbstractProvider
 {
     /**
-     * @param string $url
-     * @param string $name
-     * @param string $version
-     *
      * @return string URL to the repository
      */
     public function getUrl()
