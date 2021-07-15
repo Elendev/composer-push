@@ -164,7 +164,8 @@ class Configuration
     /**
      * @return boolean
      */
-    public function getVerifySsl() {
+    public function getVerifySsl()
+    {
         $verifySsl = $this->input->getOption('ssl-verify');
 
         if ($verifySsl === null) {
