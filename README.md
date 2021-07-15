@@ -11,8 +11,9 @@ Composer repository hosted with [nexus-repository-composer](https://github.com/s
 Many of the options are optional since they can be added directly to the `composer.json` file.
 ```bash
  # At the root of your directory
- $ composer nexus-push [--name=<package name>] \
-   [--url=<URL to the composer nexus repository>] \
+ $ composer push [--name=<package name>] \
+   [--url=<URL to the composer repository>] \
+   [--type=<Type of repository, nexus by default>]
    [--repository=<the repository you want to save, use this parameter if you want to control which repository to upload to by command-line parameter>] \
    [--username=USERNAME] \
    [--password=PASSWORD] \
@@ -25,14 +26,14 @@ Many of the options are optional since they can be added directly to the `compos
    <version>
    
  # Example 
- $ composer nexus-push --username=admin --password=admin123 --url=http://localhost:8081/repository/composer --ignore=test.php --ignore=foo/ --src-type=git --src-url="$(git remote get-url origin)" --src-ref="$(git rev-parse HEAD)" 0.0.1
+ $ composer push --username=admin --password=admin123 --url=http://localhost:8081/repository/composer --ignore=test.php --ignore=foo/ --src-type=git --src-url="$(git remote get-url origin)" --src-ref="$(git rev-parse HEAD)" 0.0.1
  
  # Example of use --repository
  # you need firstly configure multi repositories in composer.json of the project.
  # Please refer to Configuration below (multi repository configuration format) for configuration method
  # The component will be uploaded to the first repository whose's name value matching -- repository value
  # If there is no matching between the value of repository name and the value of -- repository, the upload will fail with a prompt
- $ composer nexus-push --username=admin --password=admin123 --repository=prod --ignore=test.php --ignore=foo/ 0.0.1
+ $ composer push --username=admin --password=admin123 --repository=prod --ignore=test.php --ignore=foo/ 0.0.1
  ```
 
 ## Configuration
@@ -40,8 +41,9 @@ It's possible to add some configurations inside the `composer.json` file
 ```json
 {
     "extra": {
-        "nexus-push": {
+        "push": {
             "url": "http://localhost:8081/repository/composer",
+            "type": "nexus",
             "username": "admin",
             "password": "admin123",
             "ignore-by-git-attributes": true,
@@ -60,7 +62,7 @@ For versions later than 0.1.5, the command-line parameter -- repository is intro
 ```json
 {
     "extra": {
-        "nexus-push": [{
+        "push": [{
             "name": "prod",
             "url": "http://localhost:8081/repository/composer-releases",
             "username": "admin",
