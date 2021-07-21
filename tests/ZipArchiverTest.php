@@ -31,6 +31,7 @@ class ZipArchiverTest extends TestCase
         ZipArchiver::archiveDirectory(
             $directory,
             $this->generationPath,
+            '0.0.1',
             $subdirectory,
             $ignore
         );
@@ -87,6 +88,58 @@ class ZipArchiverTest extends TestCase
     }
 
     /**
+     * @covers \Elendev\NexusComposerPush\ZipArchiver::archiveDirectory
+     * @dataProvider composerArchiverProvider
+     */
+    public function testComposerArchiveDirectory(string $directory, array $expectedResult, $subdirectory, string $version) {
+        ZipArchiver::archiveDirectory(
+            $directory,
+            $this->generationPath,
+            $version,
+            $subdirectory
+        );
+
+        $this->assertArchiveContainsFiles($this->generationPath, $expectedResult);
+        $this->assertComposerJsonVersion($this->generationPath, $subdirectory, $version);
+    }
+
+    public function composerArchiverProvider() {
+        return [
+            [
+                __DIR__ . '/ZipArchiverTest/ComposerJsonArchive',
+                [
+                    'composer.json',
+                    'src/myFile.php',
+                    'src/myOtherFile.php',
+                ],
+                null,
+                '0.0.1',
+            ],
+            [
+                __DIR__ . '/ZipArchiverTest/ComposerJsonArchive',
+                [
+                    'composer.json',
+                    'src/myFile.php',
+                    'src/myOtherFile.php',
+                ],
+                null,
+                'v1.0.0',
+            ],
+            [
+                __DIR__ . '/ZipArchiverTest/ComposerJsonArchive',
+                [
+                    'composer-json-archive/composer.json',
+                    'composer-json-archive/src/myFile.php',
+                    'composer-json-archive/src/myOtherFile.php',
+                ],
+                'composer-json-archive',
+                'v2.0.0',
+            ],
+        ];
+    }
+
+
+    /**
      * Assert that the given archive contains the files
      * @param string $archivePath
      * @param array $files
@@ -101,7 +154,23 @@ class ZipArchiverTest extends TestCase
             $entry = $archive->statIndex($i);
             $this->assertContains($entry['name'], $files);
         }
+    }
 
+    /**
+     * @param string $archivePath
+     * @param string $version
+     */
+    private function assertComposerJsonVersion(string $archivePath, $subDirectory, string $version)
+    {
+        $archive = new \ZipArchive();
+        $archive->open($archivePath);
 
+        $filePath = ($subDirectory ? $subDirectory . '/' : '') . 'composer.json';
+
+        $content = json_decode($archive->getFromName($filePath));
+
+        $this->assertEquals($version, $content->version);
+
+        $archive->close();
     }
 }

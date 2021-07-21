@@ -34,7 +34,8 @@ class PushCommand extends BaseCommand
     const REPOSITORY = 'repository';
 
     const PROVIDER_TYPES = [
-        'nexus' => 'Elendev\NexusComposerPush\RepositoryProvider\NexusProvider'
+        'nexus' => 'Elendev\NexusComposerPush\RepositoryProvider\NexusProvider',
+        'artifactory' => 'Elendev\NexusComposerPush\RepositoryProvider\ArtifactoryProvider'
     ];
 
     protected function configure()
@@ -121,6 +122,7 @@ EOT
             ZipArchiver::archiveDirectory(
                 getcwd(),
                 $fileName,
+                $this->configuration->getVersion(),
                 $subdirectory,
                 $ignoredDirectories,
                 $this->getIO()

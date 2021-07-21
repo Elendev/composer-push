@@ -136,7 +136,7 @@ abstract class AbstractProvider
                     } else {
                         $this->getIO()
                             ->writeError(
-                                'A network error occured while trying to upload to nexus: ' . $e->getMessage(),
+                                'A network error occured while trying to upload to the server: ' . $e->getMessage(),
                                 true,
                                 IOInterface::QUIET
                             );
