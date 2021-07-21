@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Elendev\NexusComposerPush\RepositoryProvider;
+namespace Elendev\ComposerPush\RepositoryProvider;
 
 class ArtifactoryProvider extends AbstractProvider
 {

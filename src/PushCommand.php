@@ -1,5 +1,5 @@
 <?php
-namespace Elendev\NexusComposerPush;
+namespace Elendev\ComposerPush;
 
 if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     $loader = require_once dirname(__DIR__) . '/vendor/autoload.php';
@@ -16,7 +16,7 @@ if (isset($loader) && $loader !== true) {
 
 use Composer\Command\BaseCommand;
 use Composer\IO\IOInterface;
-use Elendev\NexusComposerPush\RepositoryProvider\AbstractProvider;
+use Elendev\ComposerPush\RepositoryProvider\AbstractProvider;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -34,8 +34,8 @@ class PushCommand extends BaseCommand
     const REPOSITORY = 'repository';
 
     const PROVIDER_TYPES = [
-        'nexus' => 'Elendev\NexusComposerPush\RepositoryProvider\NexusProvider',
-        'artifactory' => 'Elendev\NexusComposerPush\RepositoryProvider\ArtifactoryProvider'
+        'nexus' => 'Elendev\ComposerPush\RepositoryProvider\NexusProvider',
+        'artifactory' => 'Elendev\ComposerPush\RepositoryProvider\ArtifactoryProvider'
     ];
 
     protected function configure()

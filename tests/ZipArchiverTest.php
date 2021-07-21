@@ -1,6 +1,6 @@
 <?php
 
-namespace Elendev\NexusComposerPush;
+namespace Elendev\ComposerPush;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -88,7 +88,7 @@ class ZipArchiverTest extends TestCase
     }
 
     /**
-     * @covers \Elendev\NexusComposerPush\ZipArchiver::archiveDirectory
+     * @covers \Elendev\ComposerPush\ZipArchiver::archiveDirectory
      * @dataProvider composerArchiverProvider
      */
     public function testComposerArchiveDirectory(string $directory, array $expectedResult, $subdirectory, string $version) {

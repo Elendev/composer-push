@@ -1,10 +1,7 @@
 <?php
 
 
-namespace Elendev\NexusComposerPush\RepositoryProvider;
-
-use Composer\IO\IOInterface;
-use GuzzleHttp\Exception\ClientException;
+namespace Elendev\ComposerPush\RepositoryProvider;
 
 class NexusProvider extends AbstractProvider
 {

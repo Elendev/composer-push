@@ -1,13 +1,12 @@
 <?php
 
 
-namespace Elendev\NexusComposerPush;
+namespace Elendev\ComposerPush;
 
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
 
 class ZipArchiver
 {

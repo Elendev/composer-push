@@ -4,8 +4,8 @@ namespace RepositoryProvider;
 
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
-use Elendev\NexusComposerPush\Configuration;
-use Elendev\NexusComposerPush\RepositoryProvider\NexusProvider;
+use Elendev\ComposerPush\Configuration;
+use Elendev\ComposerPush\RepositoryProvider\NexusProvider;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -25,7 +25,7 @@ class NexusProviderTest extends TestCase
     }
 
     /**
-     * @covers \Elendev\NexusComposerPush\RepositoryProvider\NexusProvider::sendFile
+     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
      */
     public function testSendFile()
     {
@@ -52,7 +52,7 @@ class NexusProviderTest extends TestCase
     }
 
     /**
-     * @covers \Elendev\NexusComposerPush\RepositoryProvider\NexusProvider::sendFile
+     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
      */
     public function testSendFileWithAuthentication()
     {
@@ -84,7 +84,7 @@ class NexusProviderTest extends TestCase
     }
 
     /**
-     * @covers \Elendev\NexusComposerPush\RepositoryProvider\NexusProvider::sendFile
+     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
      */
     public function testSendFileWithConfigCredentials()
     {
@@ -122,7 +122,7 @@ class NexusProviderTest extends TestCase
     }
 
     /**
-     * @covers \Elendev\NexusComposerPush\RepositoryProvider\NexusProvider::sendFile
+     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
      */
     public function testSendFileWithAuthenticationCredentials()
     {
@@ -157,7 +157,7 @@ class NexusProviderTest extends TestCase
     }
 
     /**
-     * @covers \Elendev\NexusComposerPush\RepositoryProvider\NexusProvider::sendFile
+     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
      */
     public function testSendFileWithMultipleCredentials()
     {
@@ -196,7 +196,7 @@ class NexusProviderTest extends TestCase
     }
 
     /**
-     * @covers \Elendev\NexusComposerPush\RepositoryProvider\NexusProvider::sendFile
+     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
      */
     public function testSendFileWithBadCredentials()
     {

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Elendev\NexusComposerPush;
+namespace Elendev\ComposerPush;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;

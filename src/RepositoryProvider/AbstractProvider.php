@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Elendev\NexusComposerPush\RepositoryProvider;
+namespace Elendev\ComposerPush\RepositoryProvider;
 
 use Composer\IO\IOInterface;
-use Elendev\NexusComposerPush\Configuration;
+use Elendev\ComposerPush\Configuration;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;

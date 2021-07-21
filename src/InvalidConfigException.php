@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Elendev\NexusComposerPush;
+namespace Elendev\ComposerPush;
 
 class InvalidConfigException extends \LogicException
 {
