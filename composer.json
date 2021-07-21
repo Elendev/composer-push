@@ -1,7 +1,8 @@
 {
-    "name": "elendev/nexus-composer-push",
+    "name": "elendev/composer-push",
     "description": "Provide a Push command to composer to push to repositories",
     "type": "composer-plugin",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Elendev",
@@ -28,6 +29,9 @@
         "friendsofphp/php-cs-fixer": "^2.18",
         "phpunit/phpunit": "^8 || ^9",
         "composer/composer": "^1.8 || ^2.0"
+    },
+    "replace": {
+        "elendev/nexus-composer-push":  "*"
     },
     "suggest": {
         "elendev/composer-push": "Replaces the elendev/nexus-composer-push repository, which is deprecated."

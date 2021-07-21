@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 21.07.2021
+ * Rename from `elendev/nexus-composer-push` to `elendev/composer-push`. #50
+ * Add `Apache-2.0` to `composer.json`. #50
+
 ## [0.6.1] - 21.07.2021
  * Add `artifactory` support by using `"type": "artyfactory"` in configuration. #49
  * Last version of `elendev/nexus-composer-push`, use `elendev/composer-push` instead.
