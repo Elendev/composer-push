@@ -2,6 +2,7 @@
     "name": "elendev/composer-push",
     "description": "Provide a Push command to composer to push to repositories",
     "type": "composer-plugin",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Elendev",
