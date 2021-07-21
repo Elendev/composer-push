@@ -3,7 +3,7 @@
 
 namespace Elendev\ComposerPush\RepositoryProvider;
 
-class NexusProvider extends AbstractProvider
+class ArtifactoryProvider extends AbstractProvider
 {
     /**
      * @return string URL to the repository
@@ -13,6 +13,9 @@ class NexusProvider extends AbstractProvider
         $url = $this->getConfiguration()->getUrl();
         $name = $this->getConfiguration()->getPackageName();
         $version = $this->getConfiguration()->getVersion();
+
+        $nameArray = explode('/', $name);
+        $moduleName = end($nameArray);
 
         if (empty($url)) {
             throw new \InvalidArgumentException('The option --url is required or has to be provided as an extra argument in composer.json');
@@ -25,7 +28,7 @@ class NexusProvider extends AbstractProvider
         // Remove trailing slash from URL
         $url = preg_replace('{/$}', '', $url);
 
-        return sprintf('%s/packages/upload/%s/%s', $url, $name, $version);
+        return sprintf('%s/%s/%s-%s', $url, $name, $moduleName, $version);
     }
 
     /**
@@ -40,43 +43,27 @@ class NexusProvider extends AbstractProvider
      */
     protected function postFile($file, $username = null, $password = null)
     {
-        $url = $this->getUrl();
-
-        $sourceType = $this->getConfiguration()->getSourceType();
-        $sourceUrl = $this->getConfiguration()->getSourceUrl();
-        $sourceReference = $this->getConfiguration()->getSourceReference();
+        $url = $this->getUrl() . '.' . pathinfo($file, PATHINFO_EXTENSION) . '?properties=composer.version=' . $this->getConfiguration()->getVersion();
 
         $options = [
             'debug' => $this->getIO()->isVeryVerbose(),
+            'body' => fopen($file, 'r'),
+            /*'props' => [
+                'composer.version' => $this->getConfiguration()->getVersion()
+            ]*/
         ];
-        if (!empty($sourceType) && !empty($sourceUrl) && !empty($sourceReference)) {
-            $options['multipart'] = [
-                [
-                    'Content-Type' => 'application/zip',
-                    'name' => 'package',
-                    'contents' => fopen($file, 'r')
-                ],
-                [
-                    'name' => 'src-type',
-                    'contents' => $sourceType
-                ],
-                [
-                    'name' => 'src-url',
-                    'contents' => $sourceUrl
-                ],
-                [
-                    'name' => 'src-ref',
-                    'contents' => $sourceReference
-                ]
-            ];
-        } else {
-            $options['body'] = fopen($file, 'r');
-        }
 
         if (!empty($username) && !empty($password)) {
             $options['auth'] = [$username, $password];
         }
 
         $this->getClient()->request('PUT', $url, $options);
+        //$this->getClient()->request('PUT', $url);
+
+        /*$this->getClient()->request('PATCH', $url, [
+            'props' => [
+                'composer.version' => $this->getConfiguration()->getVersion()
+            ]
+        ]);*/
     }
 }

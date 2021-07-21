@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Elendev\NexusComposerPush;
+namespace Elendev\ComposerPush;
 
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
@@ -26,6 +26,7 @@ class ZipArchiver
     public static function archiveDirectory(
         $source,
         $destination,
+        $version,
         $subDirectory = null,
         $ignores = [],
         $keepDotFiles = false,
@@ -91,7 +92,46 @@ class ZipArchiver
             $archive->addFile($fileInfo->getRealPath(), $zipPath);
         }
 
+        $archive->close();
+
+        $io->write('Update version in ZIP archive to ' . $version, true, IOInterface::VERBOSE);
+
+        self::updateVersion($destination, $subDirectory, $version, $io);
+
         $io->write('Zip archive ' . $destination . ' done');
+    }
+
+    /**
+     * Update the version of the composer.json file of the zip archive
+     * @param $zipFile
+     * @param $subDirectory
+     * @param $version
+     * @param \Composer\IO\IOInterface|null $io
+     * @throws \Exception
+     */
+    private static function updateVersion($zipFile, $subDirectory, $version, $io)
+    {
+        $archive = new \ZipArchive();
+
+        if ($archive->open($zipFile) !== true) {
+            throw new \Exception('Impossible to update Composer version in composer.json');
+        }
+
+        $filePath = ($subDirectory ? $subDirectory . '/' : '') . 'composer.json';
+
+        $content = json_decode($archive->getFromName($filePath));
+
+        if ($content === false || $content === null) {
+            $io->write('No composer.json file in the archive (path: ' . $filePath . ')', true, IOInterface::VERBOSE);
+            return;
+        }
+
+        $content->version = $version;
+
+        $archive->deleteName($filePath);
+
+        $archive->addFromString($filePath, json_encode($content, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+
         $archive->close();
     }
 }

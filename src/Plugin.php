@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Elendev\NexusComposerPush;
+namespace Elendev\ComposerPush;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
@@ -17,7 +17,7 @@ class Plugin implements PluginInterface, Capable
     public function getCapabilities()
     {
         return array(
-          'Composer\Plugin\Capability\CommandProvider' => 'Elendev\NexusComposerPush\PushCommandProvider',
+          'Composer\Plugin\Capability\CommandProvider' => 'Elendev\ComposerPush\PushCommandProvider',
         );
     }
 

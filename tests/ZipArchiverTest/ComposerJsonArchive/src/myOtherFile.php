@@ -1,0 +1,4 @@
+<?php
+/**
+ * Empty test file
+ */

@@ -1,6 +1,9 @@
-# Nexus Push command for composer
-This composer plugin provide a `composer nexus-push` command that allow to push the current package into a Nexus 
-Composer repository hosted with [nexus-repository-composer](https://github.com/sonatype-nexus-community/nexus-repository-composer).
+# Push command for composer
+This composer plugin provide a `composer push` command that allow to push the current package into a distant composer repository.
+
+Currently supported repositories are:
+ * [JFrog Artifactory](https://jfrog.com/artifactory/)
+ * Nexus, with [nexus-repository-composer](https://github.com/sonatype-nexus-community/nexus-repository-composer).
 
 ## Installation
 ```bash
@@ -13,7 +16,7 @@ Many of the options are optional since they can be added directly to the `compos
  # At the root of your directory
  $ composer push [--name=<package name>] \
    [--url=<URL to the composer repository>] \
-   [--type=<Type of repository, nexus by default>]
+   [--type=<Type of repository, nexus by default, artifactory available too>]
    [--repository=<the repository you want to save, use this parameter if you want to control which repository to upload to by command-line parameter>] \
    [--username=USERNAME] \
    [--password=PASSWORD] \
@@ -57,16 +60,17 @@ It's possible to add some configurations inside the `composer.json` file
     }
 }
 ```
-Above configuration may be called unique repository configuration format, as you can only configue one nexus repository in composer.json.  
+Above configuration may be called unique repository configuration format, as you can only configue one repository in composer.json.  
 
-In practice, for security reasons, different versions of component code, such as production and development, often apply different deployment policy, such as disable redeploy for the production version and allow redeploy for the development version, so they need to be stored in different nexus repositories.
+In practice, for security reasons, different versions of component code, such as production and development, often apply different deployment policy, such as disable redeploy for the production version and allow redeploy for the development version, so they need to be stored in different repositories.
 For versions later than 0.1.5, the command-line parameter -- repository is introduced to meet this requirement. To enable the -- repository parameter, the composer.json file needs to be in the following format:
 ```json
 {
     "extra": {
         "push": [{
             "name": "prod",
-            "url": "http://localhost:8081/repository/composer-releases",
+            "type": "artifactory",
+            "url": "https://jfrog-art.com/artifactory/composer-local/",
             "username": "admin",
             "password": "admin123",
             "ignore-by-git-attributes": true,
