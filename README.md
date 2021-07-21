@@ -10,6 +10,10 @@ Currently supported repositories are:
  $ composer require elendev/nexus-composer-push
  ```
 
+**Important note**
+
+This plugin is deprecated, we highly recommend that you use `elendev/composer-push` now.
+
 ## Usage
 Many of the options are optional since they can be added directly to the `composer.json` file.
 ```bash
