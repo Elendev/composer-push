@@ -102,7 +102,35 @@ The new version continues to support parsing the unique repository configuration
 
 The `username` and `password` can be specified in the `auth.json` file on a per-user basis with the [authentication mechanism provided by Composer](https://getcomposer.org/doc/articles/http-basic-authentication.md).
 
-## Source type, URL, reference
+## Providers
+Specificity for some of the providers.
+
+### Nexus
+
+***Source type, URL, reference***
+
 This is an optional part that can be added to the composer.json file provided for the package which can contain the source reference for this version.
 This option is useful in case you have a source manager and you would like to have a direct link to the source of an specific version.
 The example above given will read the last commit ID from git and the remote address from git as well which is quiet simple and useful.
+
+### Artifactory
+
+**Tokens**
+
+Tokens are currently supported when used as password. The username is still required for it to work.
+
+Standalone tokens are currently not supported.
+
+Example of token usage:
+```json
+{
+    "extra": {
+        "push": {
+            "url": "https://jfrog-art.com/artifactory/composer-local",
+            "type": "artifactory",
+            "username": "<username>",
+            "password": "<Authentication token for the user username>"
+        }
+    }
+}
+```
