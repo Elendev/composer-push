@@ -47,10 +47,7 @@ class ArtifactoryProvider extends AbstractProvider
 
         $options = [
             'debug' => $this->getIO()->isVeryVerbose(),
-            'body' => fopen($file, 'r'),
-            /*'props' => [
-                'composer.version' => $this->getConfiguration()->getVersion()
-            ]*/
+            'body' => fopen($file, 'r')
         ];
 
         if (!empty($username) && !empty($password)) {
@@ -58,12 +55,5 @@ class ArtifactoryProvider extends AbstractProvider
         }
 
         $this->getClient()->request('PUT', $url, $options);
-        //$this->getClient()->request('PUT', $url);
-
-        /*$this->getClient()->request('PATCH', $url, [
-            'props' => [
-                'composer.version' => $this->getConfiguration()->getVersion()
-            ]
-        ]);*/
     }
 }
