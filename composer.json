@@ -26,7 +26,7 @@
         "class": "Elendev\\ComposerPush\\Plugin"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.18",
+        "friendsofphp/php-cs-fixer": "^3.1",
         "phpunit/phpunit": "^8 || ^9",
         "composer/composer": "^1.8 || ^2.0"
     },
