@@ -162,6 +162,14 @@ class Configuration
     }
 
     /**
+     * Return the access token
+     * @return string
+     */
+    public function getAccessToken(){
+        return $this->input->getOption('access-token');
+    }
+
+    /**
      * @return boolean
      */
     public function getVerifySsl()

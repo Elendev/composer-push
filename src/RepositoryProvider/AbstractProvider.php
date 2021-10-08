@@ -68,6 +68,9 @@ abstract class AbstractProvider
                 ];
             }
 
+            if ($this->getConfiguration()->getAccessToken()) {
+                $credentials['access_token']['token'] = $this->getConfiguration()->getAccessToken();
+            }
 
             if (preg_match(
                 '{^(?:https?)://([^/]+)(?:/.*)?}',
@@ -93,15 +96,15 @@ abstract class AbstractProvider
                     );
 
                 try {
-                    if (empty($credential) || empty($credential['username']) || empty($credential['password'])) {
+                    if (!empty($credential['token'])) {
                         $this->getIO()
                             ->write(
-                                '[postFile] Use no credentials',
+                                '[postFile] Use ' . $type,
                                 true,
                                 IOInterface::VERY_VERBOSE
                             );
-                        $this->postFile($filePath);
-                    } else {
+                        $this->postFileWithToken($filePath, $credential['token']);
+                    } else if (!empty($credential['username']) && !empty($credential['password'])) {
                         $this->getIO()
                             ->write(
                                 '[postFile] Use user ' . $credential['username'],
@@ -113,6 +116,14 @@ abstract class AbstractProvider
                             $credential['username'],
                             $credential['password']
                         );
+                    } else {
+						$this->getIO()
+                            ->write(
+                                '[postFile] Use no credentials',
+                                true,
+                                IOInterface::VERY_VERBOSE
+                            );
+                        $this->postFile($filePath); 
                     }
 
                     return;
@@ -156,6 +167,14 @@ abstract class AbstractProvider
      * @return mixed
      */
     abstract protected function postFile($file, $username = null, $password = null);
+
+    /**
+     * Post the given file with access token
+     * @param $file
+     * @param string $token
+     * @return mixed
+     */
+    abstract protected function postFileWithToken($file, $token);
 
     /**
      * @return Configuration

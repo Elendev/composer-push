@@ -40,15 +40,35 @@ class NexusProvider extends AbstractProvider
      */
     protected function postFile($file, $username = null, $password = null)
     {
+        $options = [];
+
+        if (!empty($username) && !empty($password)) {
+            $options['auth'] = [$username, $password];
+        }
+
+        $this->apiCall($file, $options);
+    }
+
+    /**
+     * Post with access token auth
+     */
+    protected function postFileWithToken($file, $token)
+    {
+        $options = [];
+        $options['headers']['Authorization'] = 'Bearer ' . $token;
+        $this->apiCall($file, $options);
+    }
+
+    private function apiCall($file, $options)
+    {
         $url = $this->getUrl();
 
         $sourceType = $this->getConfiguration()->getSourceType();
         $sourceUrl = $this->getConfiguration()->getSourceUrl();
         $sourceReference = $this->getConfiguration()->getSourceReference();
 
-        $options = [
-            'debug' => $this->getIO()->isVeryVerbose(),
-        ];
+        $options['debug'] = $this->getIO()->isVeryVerbose();
+
         if (!empty($sourceType) && !empty($sourceUrl) && !empty($sourceReference)) {
             $options['multipart'] = [
                 [
@@ -71,10 +91,6 @@ class NexusProvider extends AbstractProvider
             ];
         } else {
             $options['body'] = fopen($file, 'r');
-        }
-
-        if (!empty($username) && !empty($password)) {
-            $options['auth'] = [$username, $password];
         }
 
         $this->getClient()->request('PUT', $url, $options);

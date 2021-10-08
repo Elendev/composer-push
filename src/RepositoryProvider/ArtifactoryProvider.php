@@ -43,17 +43,29 @@ class ArtifactoryProvider extends AbstractProvider
      */
     protected function postFile($file, $username = null, $password = null)
     {
-        $url = $this->getUrl() . '.' . pathinfo($file, PATHINFO_EXTENSION) . '?properties=composer.version=' . $this->getConfiguration()->getVersion();
-
-        $options = [
-            'debug' => $this->getIO()->isVeryVerbose(),
-            'body' => fopen($file, 'r')
-        ];
-
+        $options = [];
         if (!empty($username) && !empty($password)) {
             $options['auth'] = [$username, $password];
         }
 
+        $this->apiCall($file, $options);
+    }
+
+    /**
+     * Post with access token auth
+     */
+    protected function postFileWithToken($file, $token)
+    {
+        $options = [];
+        $options['headers']['Authorization'] = 'Bearer ' . $token;
+        $this->apiCall($file, $options);
+    }
+
+    private function apiCall($file, $options)
+    {
+        $options['debug'] = $this->getIO()->isVeryVerbose();
+        $options['body'] = fopen($file, 'r');
+        $url = $this->getUrl() . '.' . pathinfo($file, PATHINFO_EXTENSION) . '?properties=composer.version=' . $this->getConfiguration()->getVersion();
         $this->getClient()->request('PUT', $url, $options);
     }
 }
