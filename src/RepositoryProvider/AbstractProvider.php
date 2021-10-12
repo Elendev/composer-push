@@ -160,13 +160,32 @@ abstract class AbstractProvider
     }
 
     /**
-     * Post the given file
-     * @param $file
-     * @param null $username
-     * @param null $password
-     * @return mixed
+     * Process the API call
+     * @param $file file to upload
+     * @param $options http call options
      */
-    abstract protected function postFile($file, $username = null, $password = null);
+    abstract protected function apiCall($file, $options);
+
+    /**
+     * The file has to be uploaded by hand because of composer limitations
+     * (impossible to use Guzzle functions.php file in a composer plugin).
+     *
+     * @param $file
+     * @param $username
+     * @param $password
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    protected function postFile($file, $username = null, $password = null)
+    {
+        $options = [];
+
+        if (!empty($username) && !empty($password)) {
+            $options['auth'] = [$username, $password];
+        }
+
+        $this->apiCall($file, $options);
+    }
 
     /**
      * Post the given file with access token
@@ -174,7 +193,12 @@ abstract class AbstractProvider
      * @param string $token
      * @return mixed
      */
-    abstract protected function postFileWithToken($file, $token);
+    protected function postFileWithToken($file, $token)
+    {
+        $options = [];
+        $options['headers']['Authorization'] = 'Bearer ' . $token;
+        $this->apiCall($file, $options);
+    }
 
     /**
      * @return Configuration

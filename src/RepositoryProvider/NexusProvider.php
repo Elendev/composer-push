@@ -29,37 +29,11 @@ class NexusProvider extends AbstractProvider
     }
 
     /**
-     * The file has to be uploaded by hand because of composer limitations
-     * (impossible to use Guzzle functions.php file in a composer plugin).
-     *
-     * @param $file
-     * @param $username
-     * @param $password
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * Process the API call
+     * @param $file file to upload
+     * @param $options http call options
      */
-    protected function postFile($file, $username = null, $password = null)
-    {
-        $options = [];
-
-        if (!empty($username) && !empty($password)) {
-            $options['auth'] = [$username, $password];
-        }
-
-        $this->apiCall($file, $options);
-    }
-
-    /**
-     * Post with access token auth
-     */
-    protected function postFileWithToken($file, $token)
-    {
-        $options = [];
-        $options['headers']['Authorization'] = 'Bearer ' . $token;
-        $this->apiCall($file, $options);
-    }
-
-    private function apiCall($file, $options)
+    protected function apiCall($file, $options)
     {
         $url = $this->getUrl();
 
