@@ -104,7 +104,7 @@ abstract class AbstractProvider
                                 IOInterface::VERY_VERBOSE
                             );
                         $this->postFileWithToken($filePath, $credential['token']);
-                    } else if (!empty($credential['username']) && !empty($credential['password'])) {
+                    } elseif (!empty($credential['username']) && !empty($credential['password'])) {
                         $this->getIO()
                             ->write(
                                 '[postFile] Use user ' . $credential['username'],
@@ -117,13 +117,13 @@ abstract class AbstractProvider
                             $credential['password']
                         );
                     } else {
-						$this->getIO()
+                        $this->getIO()
                             ->write(
                                 '[postFile] Use no credentials',
                                 true,
                                 IOInterface::VERY_VERBOSE
                             );
-                        $this->postFile($filePath); 
+                        $this->postFile($filePath);
                     }
 
                     return;

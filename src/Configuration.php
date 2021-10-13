@@ -165,7 +165,8 @@ class Configuration
      * Return the access token
      * @return string
      */
-    public function getAccessToken(){
+    public function getAccessToken()
+    {
         return $this->input->getOption('access-token');
     }
 
