@@ -31,6 +31,7 @@ Many of the options are optional since they can be added directly to the `compos
    [--src-url=<URL of the source code repository which will be added to source tag of composer package>]\
    [--src-ref=<The reference to the current code version for this package which will be added to source tag of composer package>]\
    [--ssl-verify=true/]\
+   [--access-token=<ACCESS_TOKEN added in Bearer>]
    <version>
 
 If <version> is not set, `composer.json` version will be used.

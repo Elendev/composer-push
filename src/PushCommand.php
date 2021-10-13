@@ -67,6 +67,7 @@ class PushCommand extends BaseCommand
                 new InputOption('keep-vendor', null, InputOption::VALUE_NONE, 'Keep vendor directory when creating zip'),
                 new InputOption('keep-dot-files', null, InputOption::VALUE_NONE, 'Keep dots files/dirs when creating zip'),
                 new InputOption('ssl-verify', null, InputOption::VALUE_OPTIONAL, 'Enable (true) or disable (false) the SSL verification'),
+                new InputOption('access-token', null, InputOption::VALUE_OPTIONAL, 'Access Token to get authenticated with'),
             ])
             ->setHelp(
                 <<<EOT

@@ -68,6 +68,9 @@ abstract class AbstractProvider
                 ];
             }
 
+            if ($this->getConfiguration()->getAccessToken()) {
+                $credentials['access_token']['token'] = $this->getConfiguration()->getAccessToken();
+            }
 
             if (preg_match(
                 '{^(?:https?)://([^/]+)(?:/.*)?}',
@@ -93,15 +96,15 @@ abstract class AbstractProvider
                     );
 
                 try {
-                    if (empty($credential) || empty($credential['username']) || empty($credential['password'])) {
+                    if (!empty($credential['token'])) {
                         $this->getIO()
                             ->write(
-                                '[postFile] Use no credentials',
+                                '[postFile] Use ' . $type,
                                 true,
                                 IOInterface::VERY_VERBOSE
                             );
-                        $this->postFile($filePath);
-                    } else {
+                        $this->postFileWithToken($filePath, $credential['token']);
+                    } elseif (!empty($credential['username']) && !empty($credential['password'])) {
                         $this->getIO()
                             ->write(
                                 '[postFile] Use user ' . $credential['username'],
@@ -113,6 +116,14 @@ abstract class AbstractProvider
                             $credential['username'],
                             $credential['password']
                         );
+                    } else {
+                        $this->getIO()
+                            ->write(
+                                '[postFile] Use no credentials',
+                                true,
+                                IOInterface::VERY_VERBOSE
+                            );
+                        $this->postFile($filePath);
                     }
 
                     return;
@@ -149,13 +160,45 @@ abstract class AbstractProvider
     }
 
     /**
-     * Post the given file
+     * Process the API call
+     * @param $file file to upload
+     * @param $options http call options
+     */
+    abstract protected function apiCall($file, $options);
+
+    /**
+     * The file has to be uploaded by hand because of composer limitations
+     * (impossible to use Guzzle functions.php file in a composer plugin).
+     *
      * @param $file
-     * @param null $username
-     * @param null $password
+     * @param $username
+     * @param $password
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    protected function postFile($file, $username = null, $password = null)
+    {
+        $options = [];
+
+        if (!empty($username) && !empty($password)) {
+            $options['auth'] = [$username, $password];
+        }
+
+        $this->apiCall($file, $options);
+    }
+
+    /**
+     * Post the given file with access token
+     * @param $file
+     * @param string $token
      * @return mixed
      */
-    abstract protected function postFile($file, $username = null, $password = null);
+    protected function postFileWithToken($file, $token)
+    {
+        $options = [];
+        $options['headers']['Authorization'] = 'Bearer ' . $token;
+        $this->apiCall($file, $options);
+    }
 
     /**
      * @return Configuration
