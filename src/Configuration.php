@@ -94,11 +94,13 @@ class Configuration
 
     /**
      * Return the package version
+     * If version argument is not set, will return composer.json version property
      * @return string
      */
     public function getVersion()
     {
-        return $this->input->getArgument('version');
+        $versionArgument = $this->input->getArgument('version');
+        return empty($versionArgument) ? $this->composer->getPackage()->getVersion() : $versionArgument;
     }
 
     /**
