@@ -81,6 +81,11 @@ class ConfigurationTest extends TestCase
         $this->assertEquals('my-src-type', $this->configuration->getSourceType());
     }
 
+    public function testGetAccessToken()
+    {
+        $this->assertEquals('my-token', $this->configuration->getAccessToken());
+    }
+
     public function testGetUrl()
     {
         $this->assertEquals('https://option-url.com', $this->configuration->getUrl());
@@ -267,6 +272,8 @@ class ConfigurationTest extends TestCase
                     return $this->configType;
                 case 'ssl-verify':
                     return $this->configVerifySsl;
+                case 'access-token':
+                    return 'my-token';
             }
         });
 

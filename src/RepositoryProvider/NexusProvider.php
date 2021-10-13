@@ -29,16 +29,11 @@ class NexusProvider extends AbstractProvider
     }
 
     /**
-     * The file has to be uploaded by hand because of composer limitations
-     * (impossible to use Guzzle functions.php file in a composer plugin).
-     *
-     * @param $file
-     * @param $username
-     * @param $password
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * Process the API call
+     * @param $file file to upload
+     * @param $options http call options
      */
-    protected function postFile($file, $username = null, $password = null)
+    protected function apiCall($file, $options)
     {
         $url = $this->getUrl();
 
@@ -46,9 +41,8 @@ class NexusProvider extends AbstractProvider
         $sourceUrl = $this->getConfiguration()->getSourceUrl();
         $sourceReference = $this->getConfiguration()->getSourceReference();
 
-        $options = [
-            'debug' => $this->getIO()->isVeryVerbose(),
-        ];
+        $options['debug'] = $this->getIO()->isVeryVerbose();
+
         if (!empty($sourceType) && !empty($sourceUrl) && !empty($sourceReference)) {
             $options['multipart'] = [
                 [
@@ -71,10 +65,6 @@ class NexusProvider extends AbstractProvider
             ];
         } else {
             $options['body'] = fopen($file, 'r');
-        }
-
-        if (!empty($username) && !empty($password)) {
-            $options['auth'] = [$username, $password];
         }
 
         $this->getClient()->request('PUT', $url, $options);

@@ -166,14 +166,15 @@ class NexusProviderTest extends TestCase
         $configurationMock->method('get')->willReturnCallback(function($parameter) {
             switch($parameter) {
                 case 'username':
-                    return 'admin';
+                    return '';
                 case 'password':
-                    return 'my-password';
+                    return '';
+                case 'access-token':
+                    return '';
             }
         });
 
         $mock = new MockHandler([
-            new Response(401),
             new Response(200)
         ]);
         $handlerStack = HandlerStack::create($mock);
@@ -221,6 +222,37 @@ class NexusProviderTest extends TestCase
 
         $this->expectException(\Exception::class);
         $nexusProvider->sendFile($this->getFilePath());
+    }
+
+    /**
+     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
+     */
+    public function testSendFileWithAccessToken()
+    {
+        $configurationMock = $this->createBaseConfigurationMock();
+        $ioMock = $this->createMock(IOInterface::class);
+        $configurationMock->method('getAccessToken')->willReturn('my-token');
+
+        $mock = new MockHandler([
+            new Response(200)
+        ]);
+        $handlerStack = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handlerStack]);
+
+        $nexusProvider = new NexusProvider($configurationMock, $ioMock, $client);
+
+        $nexusProvider->sendFile($this->getFilePath());
+
+        $request = $mock->getLastRequest();
+
+        $this->assertEquals('https', $request->getUri()->getScheme());
+        $this->assertEquals('example.com', $request->getUri()->getHost());
+        $this->assertEquals('/my-repository/packages/upload/my-package/2.1.0', $request->getUri()->getPath());
+        $this->assertEquals('PUT', $request->getMethod());
+
+        $this->assertEquals('Bearer my-token', $request->getHeader('Authorization')[0]);
+
+        $this->assertEquals('Simple test file to push.', $request->getBody()->getContents());
     }
 
     /**
