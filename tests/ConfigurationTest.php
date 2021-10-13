@@ -68,7 +68,22 @@ class ConfigurationTest extends TestCase
 
     public function testGetVersion()
     {
+        $this->inputMock->method('getArgument')->willReturnCallback(function ($argument) {
+            if ($argument === 'version') {
+                return '1.0.1';
+            }
+        });
         $this->assertEquals('1.0.1', $this->configuration->getVersion());
+    }
+
+    public function testGetVersionComposeJson()
+    {
+        $this->inputMock->method('getArgument')->willReturnCallback(function ($argument) {
+            if ($argument === 'version') {
+                return null;
+            }
+        });
+        $this->assertEquals('1.2.3', $this->configuration->getVersion());
     }
 
     public function testGetSourceUrl()
@@ -270,12 +285,6 @@ class ConfigurationTest extends TestCase
             }
         });
 
-        $input->method('getArgument')->willReturnCallback(function ($argument) {
-            if ($argument === 'version') {
-                return '1.0.1';
-            }
-        });
-
         return $input;
     }
 
@@ -293,6 +302,7 @@ class ConfigurationTest extends TestCase
 
         $composer->method('getPackage')->willReturn($packageInterface);
 
+        $packageInterface->method('getVersion')->willReturn('1.2.3');
         $packageInterface->method('getExtra')->willReturnCallback(function() {
             if ($this->singleConfig) {
                 return [

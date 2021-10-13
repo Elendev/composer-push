@@ -45,7 +45,7 @@ class PushCommand extends BaseCommand
             ->setAliases(['nexus-push']) // Deprecated, use push instead
             ->setDescription('Initiate a push to a distant repository')
             ->setDefinition([
-                new InputArgument('version', InputArgument::REQUIRED, 'The package version'),
+                new InputArgument('version', InputArgument::OPTIONAL, 'The package version, if not set take composer.json version'),
                 new InputOption('name', null, InputArgument::OPTIONAL, 'Name of the package (if different from the composer.json file)'),
                 new InputOption('url', null, InputArgument::OPTIONAL, 'URL to the distant repository'),
                 new InputOption('type', null, InputArgument::OPTIONAL, 'Type of the distant repository (default: nexus, available: [' . implode(', ', array_keys(self::PROVIDER_TYPES)) . '])'),

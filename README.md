@@ -32,6 +32,8 @@ Many of the options are optional since they can be added directly to the `compos
    [--src-ref=<The reference to the current code version for this package which will be added to source tag of composer package>]\
    [--ssl-verify=true/]\
    <version>
+
+If <version> is not set, `composer.json` version will be used.
    
  # Example 
  $ composer push --username=admin --password=admin123 --url=http://localhost:8081/repository/composer --ignore=test.php --ignore=foo/ --src-type=git --src-url="$(git remote get-url origin)" --src-ref="$(git rev-parse HEAD)" 0.0.1
