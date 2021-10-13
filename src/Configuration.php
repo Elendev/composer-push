@@ -100,7 +100,7 @@ class Configuration
     public function getVersion()
     {
         $versionArgument = $this->input->getArgument('version');
-        return (!isset($versionArgument) || empty($versionArgument)) ? $this->composer->getPackage()->getVersion() : $versionArgument;
+        return empty($versionArgument) ? $this->composer->getPackage()->getVersion() : $versionArgument;
     }
 
     /**
