@@ -98,9 +98,15 @@ EOT
             }
         }
 
+        $composer = $this->getComposer(true);
+
+        if (empty($this->configuration->getVersion())) {
+            throw new InvalidArgumentException('No version found, you chould either provide version argument in the command or add version in composer.json');
+        }
+
         $fileName = tempnam(sys_get_temp_dir(), 'composer-push') . '.zip';
 
-        $this->configuration = new Configuration($input, $this->getComposer(true), $this->getIO());
+        $this->configuration = new Configuration($input, $composer, $this->getIO());
 
         $packageName = $this->configuration->getPackageName();
 
