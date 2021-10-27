@@ -140,7 +140,7 @@ EOT
             $provider->sendFile($fileName);
 
             $this->getIO()
-                ->write('Archive correctly pushed to the Nexus server');
+                ->write('Archive correctly pushed to the ' . ucfirst($input->getOption('type')) . ' server');
         } finally {
             $this->getIO()
                 ->write(
