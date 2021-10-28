@@ -140,7 +140,7 @@ EOT
             $provider->sendFile($fileName);
 
             $this->getIO()
-                ->write('Archive correctly pushed to the ' . ucfirst($input->getOption('type')) . ' server');
+                ->write('Archive correctly pushed to the ' . ucfirst($this->configuration->getType()) . ' server');
         } finally {
             $this->getIO()
                 ->write(
