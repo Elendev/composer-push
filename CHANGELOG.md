@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] - 30.10.2021
+ * Throw error when the version is not specified #57 thanks to @LeJeanbono
+ * Display the correct repository type instead of always Nexus #58 - Thanks to @hexa2k9 and @LeJeanbono
+
 ## [0.8.0] - 13.10.2021
  * Add support for access tokens #51 #55 - Thanks to @LeJeanbono
  * Use version from composer.json if none is specified in the CLI #10 #56 - Thanks to @LeJeanbono
