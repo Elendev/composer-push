@@ -62,7 +62,7 @@ jobs:
 
   BuildDone:
     name: PHP full build
-    needs: [PHPCS, PHPUnit]
+    needs: [PHPCS, PHPUnit-Symfony45, PHPUnit-Symfony6]
     runs-on: ubuntu-latest
     steps:
       - run: "echo build done"
