@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Elendev\ComposerPush\RepositoryProvider;
 
 use Composer\IO\IOInterface;

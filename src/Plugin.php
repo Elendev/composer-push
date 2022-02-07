@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Elendev\ComposerPush;
 
 use Composer\Composer;

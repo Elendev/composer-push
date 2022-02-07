@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Elendev\ComposerPush\RepositoryProvider;
 
 class NexusProvider extends AbstractProvider

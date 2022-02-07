@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Elendev\ComposerPush;
 
 use Composer\IO\IOInterface;
@@ -10,7 +9,6 @@ use Symfony\Component\Finder\Finder;
 
 class ZipArchiver
 {
-
     /**
      * Archive the given directory in the $destination file
      *

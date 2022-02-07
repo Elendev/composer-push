@@ -1,4 +1,5 @@
 <?php
+
 namespace Elendev\ComposerPush;
 
 if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
@@ -25,15 +26,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class PushCommand extends BaseCommand
 {
-
     /**
      * @var Configuration
      */
     private $configuration;
 
-    const REPOSITORY = 'repository';
+    public const REPOSITORY = 'repository';
 
-    const PROVIDER_TYPES = [
+    public const PROVIDER_TYPES = [
         'nexus' => 'Elendev\ComposerPush\RepositoryProvider\NexusProvider',
         'artifactory' => 'Elendev\ComposerPush\RepositoryProvider\ArtifactoryProvider'
     ];
