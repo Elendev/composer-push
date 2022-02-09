@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Elendev\ComposerPush;
 
 use Composer\Composer;
@@ -29,7 +28,7 @@ class Configuration
      */
     private $io;
 
-    const PUSH_CFG_NAME = 'name';
+    public const PUSH_CFG_NAME = 'name';
 
     public function __construct(InputInterface $input, Composer $composer, IOInterface $io)
     {

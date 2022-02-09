@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Elendev\ComposerPush\RepositoryProvider;
 
 class ArtifactoryProvider extends AbstractProvider
