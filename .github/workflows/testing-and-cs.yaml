@@ -9,11 +9,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: 'Composer install'
-        uses: docker://composer:1.9
+        uses: docker://composer:2.2
         with:
           args: install
       - name: 'Code sniffing'
-        uses: docker://php:7.4-cli
+        uses: docker://php:8.1-cli
         with:
           args: "vendor/bin/php-cs-fixer fix src --dry-run"
 
@@ -34,11 +34,11 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: composer:${{ matrix.composer }}
-      - run: composer install
+      - run: composer install --no-dev
       - run: composer require "symfony/finder:${{ matrix.symfony }}" "symfony/filesystem:${{ matrix.symfony }}"
       - run: composer update
       - run: vendor/bin/phpunit tests
-  PHPUnit-Symfony6:
+  PHPUnit-Symfony56:
     name: PHPUnit testing
     runs-on: ubuntu-latest
     strategy:
@@ -46,7 +46,7 @@ jobs:
       matrix:
         php: [8.0, 8.1]
         composer: [2.0, 2.1, 2.2, 2.3]
-        symfony: [^6.0]
+        symfony: [^5.4, ^6.0]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -55,14 +55,14 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: composer:${{ matrix.composer }}
-      - run: composer install
+      - run: composer install --no-dev
       - run: composer require "symfony/finder:${{ matrix.symfony }}" "symfony/filesystem:${{ matrix.symfony }}"
       - run: composer update
       - run: vendor/bin/phpunit tests
 
   BuildDone:
     name: PHP full build
-    needs: [PHPCS, PHPUnit-Symfony45, PHPUnit-Symfony6]
+    needs: [PHPCS, PHPUnit-Symfony45, PHPUnit-Symfony56]
     runs-on: ubuntu-latest
     steps:
       - run: "echo build done"
