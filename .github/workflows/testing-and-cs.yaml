@@ -34,9 +34,8 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: composer:${{ matrix.composer }}
-      - run: composer install --no-dev
       - run: composer require "symfony/finder:${{ matrix.symfony }}" "symfony/filesystem:${{ matrix.symfony }}"
-      - run: composer update
+      - run: composer update --no-dev
       - run: vendor/bin/phpunit tests
   PHPUnit-Symfony56:
     name: PHPUnit testing
@@ -55,9 +54,8 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: composer:${{ matrix.composer }}
-      - run: composer install --no-dev
       - run: composer require "symfony/finder:${{ matrix.symfony }}" "symfony/filesystem:${{ matrix.symfony }}"
-      - run: composer update
+      - run: composer update --no-dev
       - run: vendor/bin/phpunit tests
 
   BuildDone:
