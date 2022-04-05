@@ -147,6 +147,8 @@ EOT
 
             $this->getIO()
                 ->write('Archive correctly pushed to the ' . ucfirst($this->configuration->getType()) . ' server');
+
+            return 0;
         } finally {
             $this->getIO()
                 ->write(
