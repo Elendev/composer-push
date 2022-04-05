@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 05.04.2022
+ * Add fixes for return code in execute command #64
+ * Fix testing with old versions of Symfony and code styling tool
+
 ## [1.0.1] - 05.04.2022
  * Due to the backward compatibility issues with Composer 2.3, specify in composer.json that it's not yet supported.
 
