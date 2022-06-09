@@ -75,7 +75,7 @@ class NexusProvider extends AbstractProvider
                 $downloadTotal,
                 $downloadedBytes,
                 $uploadTotal,
-                $uploadedBytes,
+                $uploadedBytes
             ) use ($progress) {
                 if ($uploadTotal === 0) {
                     return;
