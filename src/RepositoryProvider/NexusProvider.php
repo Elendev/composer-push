@@ -68,7 +68,7 @@ class NexusProvider extends AbstractProvider
 
         $io = $this->getIO();
 
-        if(method_exists($io, 'getProgressBar')) {
+        if (method_exists($io, 'getProgressBar')) {
             /** @var \Symfony\Component\Console\Helper\ProgressBar */
             $progress = $io->getProgressBar();
             $options['progress'] = function (
