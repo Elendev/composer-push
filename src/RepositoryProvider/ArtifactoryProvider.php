@@ -39,6 +39,38 @@ class ArtifactoryProvider extends AbstractProvider
     {
         $options['debug'] = $this->getIO()->isVeryVerbose();
         $options['body'] = fopen($file, 'r');
+
+        $io = $this->getIO();
+
+        if(method_exists($io, 'getProgressBar')) {
+            /** @var \Symfony\Component\Console\Helper\ProgressBar */
+            $progress = $io->getProgressBar();
+            $options['progress'] = function (
+                $downloadTotal,
+                $downloadedBytes,
+                $uploadTotal,
+                $uploadedBytes,
+            ) use ($progress) {
+                if ($uploadTotal === 0) {
+                    return;
+                }
+                if ($uploadedBytes === 0) {
+                    $progress->start(100);
+                    return;
+                }
+
+                if ($uploadedBytes === $uploadTotal) {
+                    if ($progress->getProgress() != 100) {
+                        $progress->finish();
+                        $this->getIO()->write('');
+                    }
+                    return;
+                }
+
+                $progress->setProgress(($uploadedBytes / $uploadTotal) * 100);
+            };
+        }
+
         $url = $this->getUrl() . '.' . pathinfo($file, PATHINFO_EXTENSION) . '?properties=composer.version=' . $this->getConfiguration()->getVersion();
         $this->getClient()->request('PUT', $url, $options);
     }
