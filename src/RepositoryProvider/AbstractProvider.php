@@ -25,11 +25,19 @@ abstract class AbstractProvider
      */
     private $io;
 
+    /**
+     * @var \Symfony\Component\Console\Helper\ProgressBar|null
+     */
+    private $progress = null;
+
     public function __construct(Configuration $configuration, IOInterface $io, Client $client = null)
     {
         $this->configuration = $configuration;
         $this->io = $io;
         $this->client = $client;
+        if (method_exists($io, 'getProgressBar')) {
+            $this->progress = $io->getProgressBar();
+        }
     }
 
     /**
@@ -227,5 +235,49 @@ abstract class AbstractProvider
             ]);
         }
         return $this->client;
+    }
+
+    /**
+     * Return the Progress Callback for Guzzle
+     *
+     * @return callback
+     */
+    protected function getProgressCallback()
+    {
+        if ($this->progress === null) {
+            return function (
+                $downloadTotal,
+                $downloadedBytes,
+                $uploadTotal,
+                $uploadedBytes
+            ) {
+                //Do nothing
+            };
+        }
+        return function (
+            $downloadTotal,
+            $downloadedBytes,
+            $uploadTotal,
+            $uploadedBytes
+        ) {
+            if ($uploadTotal === 0) {
+                return;
+            }
+            if ($uploadedBytes === 0) {
+                $this->progress->start(100);
+                return;
+            }
+
+            if ($uploadedBytes === $uploadTotal) {
+                if ($this->progress->getProgress() != 100) {
+                    $this->progress->setProgress(100);
+                    $this->progress->finish();
+                    $this->getIO()->write('');
+                }
+                return;
+            }
+
+            $this->progress->setProgress(($uploadedBytes / $uploadTotal) * 100);
+        };
     }
 }
