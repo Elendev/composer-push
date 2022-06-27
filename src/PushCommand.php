@@ -139,7 +139,7 @@ EOT
 
             $this->getIO()
                 ->write(
-                    'Execute the push for the URL ' . $provider->getUrl() . '...',
+                    'Pushing archive to URL: ' . $provider->getUrl() . '...',
                     true
                 );
 

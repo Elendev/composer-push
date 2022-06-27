@@ -39,6 +39,7 @@ class ArtifactoryProvider extends AbstractProvider
     {
         $options['debug'] = $this->getIO()->isVeryVerbose();
         $options['body'] = fopen($file, 'r');
+        $options['progress'] = $this->getProgressCallback();
         $url = $this->getUrl() . '.' . pathinfo($file, PATHINFO_EXTENSION) . '?properties=composer.version=' . $this->getConfiguration()->getVersion();
         $this->getClient()->request('PUT', $url, $options);
     }

@@ -30,6 +30,11 @@
         "phpunit/phpunit": "^8 || ^9 || ^10",
         "composer/composer": "^1.8 ||  ^2.0"
     },
+    "scripts": {
+        "test": "phpunit tests",
+        "cs-fixer": "php-cs-fixer fix src"
+
+    },
     "replace": {
         "elendev/nexus-composer-push":  "*"
     },

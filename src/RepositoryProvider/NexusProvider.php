@@ -66,6 +66,8 @@ class NexusProvider extends AbstractProvider
             $options['body'] = fopen($file, 'r');
         }
 
+        $options['progress'] = $this->getProgressCallback();
+
         $this->getClient()->request('PUT', $url, $options);
     }
 }
