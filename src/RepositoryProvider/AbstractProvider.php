@@ -277,7 +277,7 @@ abstract class AbstractProvider
                 return;
             }
 
-            $this->progress->setProgress(($uploadedBytes / $uploadTotal) * 100);
+            $this->progress->setProgress((int) (($uploadedBytes / $uploadTotal) * 100));
         };
     }
 }
