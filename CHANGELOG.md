@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 21.02.2023
+ * Silence deprecation messages #70 thanks to @tm1000
+
 ## [1.0.3] - 27.06.2022
  * Add progress bar #66 thanks to @tm1000
 
