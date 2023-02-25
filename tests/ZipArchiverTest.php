@@ -39,6 +39,26 @@ class ZipArchiverTest extends TestCase
         $this->assertArchiveContainsFiles($this->generationPath, $expectedResult);
     }
 
+    /**
+     * @dataProvider zipArchiverProvider
+     */
+    public function testArchiveDirectoryWithDotFiles(string $directory, array $expectedResult, string $subdirectory = null, array $ignore = [])
+    {
+        $expectedResult[] = $subdirectory !== null ? $subdirectory . '/.foo/foo.txt' : '.foo/foo.txt';
+
+        ZipArchiver::archiveDirectory(
+            $directory,
+            $this->generationPath,
+            '0.0.1',
+            $subdirectory,
+            $ignore,
+            true
+        );
+
+
+        $this->assertArchiveContainsFiles($this->generationPath, $expectedResult);
+    }
+
     public function zipArchiverProvider() {
         return [
             [
