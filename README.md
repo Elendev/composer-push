@@ -30,6 +30,7 @@ Many of the options are optional since they can be added directly to the `compos
    [--src-type=<The type of repository used for source code: git, svn, ... which will be added to source tag of composer package>]\
    [--src-url=<URL of the source code repository which will be added to source tag of composer package>]\
    [--src-ref=<The reference to the current code version for this package which will be added to source tag of composer package>]\
+   [--keep-vendor=<Keep vendor directory when creating zip>]
    [--ssl-verify=true/]\
    [--access-token=<ACCESS_TOKEN added in Bearer>]
    <version>
