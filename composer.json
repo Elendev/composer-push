@@ -27,7 +27,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.18|^3.4.0",
-        "phpunit/phpunit": "^8 || ^9 || ^10",
+        "phpunit/phpunit": "^11.2.7",
         "composer/composer": "^1.8 ||  ^2.0"
     },
     "scripts": {
