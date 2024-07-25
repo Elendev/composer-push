@@ -1,18 +1,21 @@
 name: Lint
 on:
-    workflow_call:
     workflow_dispatch:
+    workflow_call:
+
+concurrency:
+    group: ${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
     lint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: shivammathur/setup-php@v2
               with:
-                  php-version: 8.3
                   tools: composer
                   extensions: curl, zip
             - run: composer install
-            - run: composer phpcs
-            - run: composer psalm
+            - run: composer phpcs >> "${GITHUB_STEP_SUMMARY}"
+            - run: composer psalm >> "${GITHUB_STEP_SUMMARY}"

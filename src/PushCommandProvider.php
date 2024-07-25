@@ -1,6 +1,6 @@
 <?php
 
-namespace Elendev\ComposerPush;
+namespace Clearlyip\ComposerPush;
 
 use Composer\Plugin\Capability\CommandProvider;
 

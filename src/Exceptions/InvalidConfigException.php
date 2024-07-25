@@ -1,6 +1,6 @@
 <?php
 
-namespace Elendev\ComposerPush\Exceptions;
+namespace Clearlyip\ComposerPush\Exceptions;
 
 class InvalidConfigException extends \LogicException
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Elendev\ComposerPush;
+namespace Clearlyip\ComposerPush;
 
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;

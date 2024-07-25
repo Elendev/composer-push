@@ -1,6 +1,6 @@
 <?php
 
-namespace Elendev\ComposerPush;
+namespace Clearlyip\ComposerPush;
 
 if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     $loader = require_once dirname(__DIR__) . '/vendor/autoload.php';
@@ -18,7 +18,7 @@ if (isset($loader) && $loader !== true) {
 
 use Composer\Command\BaseCommand;
 use Composer\IO\IOInterface;
-use Elendev\ComposerPush\RepositoryProvider\AbstractProvider;
+use Clearlyip\ComposerPush\RepositoryProvider\AbstractProvider;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,9 +35,10 @@ class PushCommand extends BaseCommand
     public const REPOSITORY = 'repository';
 
     public const PROVIDER_TYPES = [
-        'nexus' => 'Elendev\ComposerPush\RepositoryProvider\NexusProvider',
+        'nexus' =>
+            \Clearlyip\ComposerPush\RepositoryProvider\NexusProvider::class,
         'artifactory' =>
-            'Elendev\ComposerPush\RepositoryProvider\ArtifactoryProvider',
+            \Clearlyip\ComposerPush\RepositoryProvider\ArtifactoryProvider::class,
     ];
 
     protected function configure()
@@ -94,12 +95,6 @@ class PushCommand extends BaseCommand
                     'i',
                     InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
                     'Directories and files to ignore when creating the zip',
-                ),
-                new InputOption(
-                    'ignore-dirs',
-                    null,
-                    InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
-                    '<error>DEPRECATED</error> Directories to ignore when creating the zip',
                 ),
                 new InputOption(
                     'ignore-by-git-attributes',

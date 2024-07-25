@@ -1,11 +1,11 @@
 <?php
 
-namespace RepositoryProvider;
+namespace Clearlyip\Tests;
 
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
-use Elendev\ComposerPush\Configuration;
-use Elendev\ComposerPush\RepositoryProvider\NexusProvider;
+use Clearlyip\ComposerPush\Configuration;
+use Clearlyip\ComposerPush\RepositoryProvider\NexusProvider;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -26,9 +26,6 @@ class NexusProviderTest extends TestCase
         );
     }
 
-    /**
-     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
-     */
     public function testSendFile()
     {
         $configurationMock = $this->createBaseConfigurationMock();
@@ -61,9 +58,6 @@ class NexusProviderTest extends TestCase
         );
     }
 
-    /**
-     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
-     */
     public function testSendFileWithAuthentication()
     {
         $configurationMock = $this->createBaseConfigurationMock();
@@ -104,9 +98,6 @@ class NexusProviderTest extends TestCase
         );
     }
 
-    /**
-     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
-     */
     public function testSendFileWithConfigCredentials()
     {
         $configurationMock = $this->createBaseConfigurationMock();
@@ -155,9 +146,6 @@ class NexusProviderTest extends TestCase
         );
     }
 
-    /**
-     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
-     */
     public function testSendFileWithAuthenticationCredentials()
     {
         $configurationMock = $this->createBaseConfigurationMock();
@@ -201,9 +189,6 @@ class NexusProviderTest extends TestCase
         );
     }
 
-    /**
-     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
-     */
     public function testSendFileWithMultipleCredentials()
     {
         $configurationMock = $this->createBaseConfigurationMock();
@@ -251,9 +236,6 @@ class NexusProviderTest extends TestCase
         );
     }
 
-    /**
-     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
-     */
     public function testSendFileWithBadCredentials()
     {
         $configurationMock = $this->createBaseConfigurationMock();
@@ -283,9 +265,6 @@ class NexusProviderTest extends TestCase
         $nexusProvider->sendFile($this->getFilePath());
     }
 
-    /**
-     * @covers \Elendev\ComposerPush\RepositoryProvider\NexusProvider::sendFile
-     */
     public function testSendFileWithAccessToken()
     {
         $configurationMock = $this->createBaseConfigurationMock();
@@ -325,10 +304,6 @@ class NexusProviderTest extends TestCase
         );
     }
 
-    /**
-     * Create a base configuration mock
-     * @return Configuration|\PHPUnit\Framework\MockObject\MockObject
-     */
     private function createBaseConfigurationMock()
     {
         $configurationMock = $this->createMock(Configuration::class);
@@ -345,8 +320,8 @@ class NexusProviderTest extends TestCase
      * Return the test file path
      * @return string
      */
-    private function getFilePath()
+    private function getFilePath(): string
     {
-        return __DIR__ . '/testFile.txt';
+        return __DIR__ . '/packages/file/testFile.txt';
     }
 }

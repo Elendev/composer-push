@@ -1,6 +1,6 @@
 <?php
 
-namespace Elendev\ComposerPush;
+namespace Clearlyip\ComposerPush;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
@@ -23,7 +23,7 @@ class Plugin implements PluginInterface, Capable
     {
         return [
             \Composer\Plugin\Capability\CommandProvider::class =>
-                \Elendev\ComposerPush\PushCommandProvider::class,
+                \Clearlyip\ComposerPush\PushCommandProvider::class,
         ];
     }
 

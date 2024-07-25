@@ -1,10 +1,10 @@
 <?php
 
-namespace Elendev\ComposerPush;
+namespace Clearlyip\ComposerPush;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
-use Elendev\ComposerPush\Exceptions\InvalidConfigException;
+use Clearlyip\ComposerPush\Exceptions\InvalidConfigException;
 use Symfony\Component\Console\Input\InputInterface;
 
 class Configuration
@@ -199,9 +199,6 @@ class Configuration
      */
     public function getIgnores(): array
     {
-        // Remove after removal of --ignore-dirs option
-        $deprecatedIgnores = $this->getDirectoriesToIgnore($this->input);
-
         $optionalIgnore = $this->input->getOption('ignore');
         $composerIgnores = $this->get('ignore', []);
         $gitAttrIgnores = $this->getGitAttributesExportIgnores($this->input);
@@ -216,39 +213,12 @@ class Configuration
         }
 
         $ignore = array_merge(
-            $deprecatedIgnores,
             $composerIgnores,
             $optionalIgnore,
             $gitAttrIgnores,
             $composerJsonIgnores,
             $defaultIgnores,
         );
-        return array_unique($ignore);
-    }
-
-    /**
-     * @param InputInterface $input
-     * @deprecated argument has been changed to ignore
-     * @return array
-     */
-    private function getDirectoriesToIgnore(InputInterface $input): array
-    {
-        $optionalIgnore = $input->getOption('ignore-dirs') ?? [];
-        $composerIgnores = $this->get('ignore-dirs', []);
-
-        if (!empty($optionalIgnore)) {
-            $this->io->write(
-                '<error>The --ignore-dirs option has been deprecated. Please use --ignore instead</error>',
-            );
-        }
-
-        if (!empty($composerIgnores)) {
-            $this->io->write(
-                '<error>The ignore-dirs config option has been deprecated. Please use ignore instead</error>',
-            );
-        }
-
-        $ignore = array_merge($composerIgnores, $optionalIgnore);
         return array_unique($ignore);
     }
 

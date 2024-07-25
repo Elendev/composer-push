@@ -1,6 +1,6 @@
 <?php
 
-namespace Elendev\ComposerPush;
+namespace Clearlyip\Tests;
 
 use Composer\Composer;
 use Composer\IO\NullIO;
@@ -8,6 +8,7 @@ use Composer\Package\RootPackageInterface;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputInterface;
+use Clearlyip\ComposerPush\Configuration;
 
 class ConfigurationTest extends TestCase
 {

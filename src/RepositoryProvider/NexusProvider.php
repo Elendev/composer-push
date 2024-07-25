@@ -1,6 +1,6 @@
 <?php
 
-namespace Elendev\ComposerPush\RepositoryProvider;
+namespace Clearlyip\ComposerPush\RepositoryProvider;
 
 use Composer\IO\ConsoleIO;
 

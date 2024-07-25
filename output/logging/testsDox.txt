@@ -1,4 +1,4 @@
-Configuration (Elendev\ComposerPush\Configuration)
+Configuration (Clearlyip\Tests\Configuration)
  [x] Get version
  [x] Get version compose json
  [x] Get source url
@@ -14,7 +14,7 @@ Configuration (Elendev\ComposerPush\Configuration)
  [x] Get package name
  [x] Get option username
 
-Nexus Provider (RepositoryProvider\NexusProvider)
+Nexus Provider (Clearlyip\Tests\NexusProvider)
  [x] Get url
  [x] Send file
  [x] Send file with authentication
@@ -24,7 +24,7 @@ Nexus Provider (RepositoryProvider\NexusProvider)
  [x] Send file with bad credentials
  [x] Send file with access token
 
-Zip Archiver (Elendev\ComposerPush\ZipArchiver)
+Zip Archiver (Clearlyip\Test\ZipArchiver)
  [x] Archive directory with data set #0
  [x] Archive directory with data set #1
  [x] Archive directory with data set #2

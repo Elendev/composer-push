@@ -1,10 +1,9 @@
 <?php
 
-namespace Elendev\ComposerPush\RepositoryProvider;
+namespace Clearlyip\ComposerPush\RepositoryProvider;
 
-use Composer\IO\ConsoleIO;
 use Composer\IO\IOInterface;
-use Elendev\ComposerPush\Configuration;
+use Clearlyip\ComposerPush\Configuration;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;

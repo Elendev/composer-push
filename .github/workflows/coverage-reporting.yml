@@ -2,9 +2,6 @@ name: Testing
 on:
     workflow_dispatch:
     pull_request:
-    push:
-        branches:
-            - master
 
 concurrency:
     group: ${{ github.ref }}
@@ -13,9 +10,9 @@ concurrency:
 jobs:
     lint:
         uses: ./.github/workflows/lint.yml
-    tests:
+    coverage:
         needs: [lint]
-        name: Matrix Testing
+        name: Coverage Reporting
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
@@ -27,28 +24,26 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
-            - name: 'Unit testing'
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: ${{ matrix.php }}
-                  tools: composer:${{ matrix.composer }}
-                  extensions: curl, zip
-            - run: composer require "symfony/finder:${{ matrix.symfony }}" "symfony/filesystem:${{ matrix.symfony }}"
-            - run: composer install
-            - run: composer test
-    coverage:
-        needs: [tests]
-        name: Coverage
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v2
             - uses: shivammathur/setup-php@v2
               with:
+                  php-version: 8.3
                   tools: composer
                   extensions: curl, zip
             - run: composer install
             - run: composer test >> "${GITHUB_STEP_SUMMARY}"
             - uses: clearlyip/code-coverage-report-action@v5
+              if: ${{ github.actor != 'dependabot[bot]'}}
+              id: code_coverage_report_action
               with:
                   filename: 'app/output/coverage/cov.xml'
+                  fail_on_negative_difference: true
+                  artifact_download_workflow_names: 'coverage,cron'
+                  overall_coverage_fail_threshold: '30'
+                  file_coverage_error_min: '30'
+                  file_coverage_warning_max: '75'
+            - name: Add Coverage PR Comment
+              uses: marocchino/sticky-pull-request-comment@v2
+              if: steps.code_coverage_report_action.outputs.file != '' && github.event_name == 'pull_request' && (success() || failure())
+              with:
+                  recreate: true
+                  path: code-coverage-results.md

@@ -1,9 +1,10 @@
 <?php
 
-namespace Elendev\ComposerPush;
+namespace Clearlyip\Test;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
+use Clearlyip\ComposerPush\ZipArchiver;
 
 class ZipArchiverTest extends TestCase
 {
@@ -51,7 +52,7 @@ class ZipArchiverTest extends TestCase
     {
         return [
             [
-                __DIR__ . '/ZipArchiverTest/TypicalArchive',
+                __DIR__ . '/packages/raw',
                 [
                     'README.md',
                     'src/myFile.php',
@@ -61,7 +62,7 @@ class ZipArchiverTest extends TestCase
                 ],
             ],
             [
-                __DIR__ . '/ZipArchiverTest/TypicalArchive',
+                __DIR__ . '/packages/raw',
                 [
                     'typicalArchive/README.md',
                     'typicalArchive/src/myFile.php',
@@ -72,13 +73,13 @@ class ZipArchiverTest extends TestCase
                 'typicalArchive',
             ],
             [
-                __DIR__ . '/ZipArchiverTest/TypicalArchive',
+                __DIR__ . '/packages/raw',
                 ['README.md', 'src/myFile.php', 'src/myOtherFile.php'],
                 null,
                 ['src/folder'],
             ],
             [
-                __DIR__ . '/ZipArchiverTest/TypicalArchive',
+                __DIR__ . '/packages/raw',
                 [
                     'README.md',
                     'src/myFile.php',
@@ -92,7 +93,6 @@ class ZipArchiverTest extends TestCase
     }
 
     /**
-     * @covers \Elendev\ComposerPush\ZipArchiver::archiveDirectory
      * @dataProvider composerArchiverProvider
      */
     public function testComposerArchiveDirectory(
@@ -123,19 +123,19 @@ class ZipArchiverTest extends TestCase
     {
         return [
             [
-                __DIR__ . '/ZipArchiverTest/ComposerJsonArchive',
+                __DIR__ . '/packages/composer',
                 ['composer.json', 'src/myFile.php', 'src/myOtherFile.php'],
                 null,
                 '0.0.1',
             ],
             [
-                __DIR__ . '/ZipArchiverTest/ComposerJsonArchive',
+                __DIR__ . '/packages/composer',
                 ['composer.json', 'src/myFile.php', 'src/myOtherFile.php'],
                 null,
                 'v1.0.0',
             ],
             [
-                __DIR__ . '/ZipArchiverTest/ComposerJsonArchive',
+                __DIR__ . '/packages/composer',
                 [
                     'composer-json-archive/composer.json',
                     'composer-json-archive/src/myFile.php',
