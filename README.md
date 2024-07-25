@@ -2,6 +2,8 @@
 
 This composer plugin provide a `composer push` command that allow to push the current package into a distant composer repository.
 
+-   Note: This is the spiritual successor to [https://github.com/Elendev/composer-push](https://github.com/Elendev/composer-push)
+
 Currently supported repositories are:
 
 -   [JFrog Artifactory](https://jfrog.com/artifactory/)
@@ -12,10 +14,6 @@ Currently supported repositories are:
 ```bash
  $ composer require clearlyip/composer-push
 ```
-
-**Important note**
-
-This plugin is the continuation of `clearlyip/composer-push`, you have to migrate to this one if you haven't done it yet.
 
 ## Usage
 

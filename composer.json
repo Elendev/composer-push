@@ -5,6 +5,10 @@
     "license": "Apache-2.0",
     "authors": [
         {
+            "name": "Andrew Nagy",
+            "email": "andrew.nagy@clearlyip.com"
+        },
+        {
             "name": "Elendev",
             "email": "jonas.renaudot@gmail.com"
         }
