@@ -1,0 +1,35 @@
+Configuration (Elendev\ComposerPush\Configuration)
+ [x] Get version
+ [x] Get version compose json
+ [x] Get source url
+ [x] Get source type
+ [x] Get access token
+ [x] Get url
+ [x] Get verify ssl
+ [x] Get
+ [x] Get ignores
+ [x] Get source reference
+ [x] Get option password
+ [x] Get type
+ [x] Get package name
+ [x] Get option username
+
+Nexus Provider (RepositoryProvider\NexusProvider)
+ [x] Get url
+ [x] Send file
+ [x] Send file with authentication
+ [x] Send file with config credentials
+ [x] Send file with authentication credentials
+ [x] Send file with multiple credentials
+ [x] Send file with bad credentials
+ [x] Send file with access token
+
+Zip Archiver (Elendev\ComposerPush\ZipArchiver)
+ [x] Archive directory with data set #0
+ [x] Archive directory with data set #1
+ [x] Archive directory with data set #2
+ [x] Archive directory with data set #3
+ [x] Composer archive directory with data set #0
+ [x] Composer archive directory with data set #1
+ [x] Composer archive directory with data set #2
+

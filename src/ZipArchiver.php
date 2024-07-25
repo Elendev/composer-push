@@ -28,14 +28,16 @@ class ZipArchiver
         $subDirectory = null,
         $ignores = [],
         $keepDotFiles = false,
-        $io = null
+        $io = null,
     ) {
         if (empty($io)) {
             $io = new NullIO();
         }
 
         if ($subDirectory) {
-            $io->write('[ZIP Archive] Archive into the subdirectory ' . $subDirectory);
+            $io->write(
+                '[ZIP Archive] Archive into the subdirectory ' . $subDirectory,
+            );
         } else {
             $io->write('[ZIP Archive] Archive into root directory');
         }
@@ -43,7 +45,10 @@ class ZipArchiver
         $finder = new Finder();
         $fileSystem = new Filesystem();
 
-        $finder->in($source)->ignoreVCS(true)->ignoreDotFiles(!$keepDotFiles);
+        $finder
+            ->in($source)
+            ->ignoreVCS(true)
+            ->ignoreDotFiles(!$keepDotFiles);
 
         foreach ($ignores as $ignore) {
             $finder->notPath($ignore);
@@ -54,15 +59,17 @@ class ZipArchiver
         $io->write(
             'Create ZIP file ' . $destination,
             true,
-            IOInterface::VERY_VERBOSE
+            IOInterface::VERY_VERBOSE,
         );
 
         if ($archive->open($destination, \ZipArchive::CREATE) !== true) {
             $io->writeError(
                 'Impossible to create ZIP file ' . $destination,
-                true
+                true,
             );
-            throw new \Exception('Impossible to create the file ' . $destination);
+            throw new \Exception(
+                'Impossible to create the file ' . $destination,
+            );
         }
 
         foreach ($finder as $fileInfo) {
@@ -72,10 +79,13 @@ class ZipArchiver
                 $zipPath = '';
             }
 
-            $zipPath .= rtrim($fileSystem->makePathRelative(
-                $fileInfo->getRealPath(),
-                $source
-            ), '/');
+            $zipPath .= rtrim(
+                $fileSystem->makePathRelative(
+                    $fileInfo->getRealPath(),
+                    $source,
+                ),
+                '/',
+            );
 
             if (!$fileInfo->isFile()) {
                 continue;
@@ -84,7 +94,7 @@ class ZipArchiver
             $io->write(
                 'Zip file ' . $fileInfo->getPath() . ' to ' . $zipPath,
                 true,
-                IOInterface::VERY_VERBOSE
+                IOInterface::VERY_VERBOSE,
             );
 
             $archive->addFile($fileInfo->getRealPath(), $zipPath);
@@ -92,7 +102,11 @@ class ZipArchiver
 
         $archive->close();
 
-        $io->write('Update version in ZIP archive to ' . $version, true, IOInterface::VERBOSE);
+        $io->write(
+            'Update version in ZIP archive to ' . $version,
+            true,
+            IOInterface::VERBOSE,
+        );
 
         self::updateVersion($destination, $subDirectory, $version, $io);
 
@@ -107,20 +121,33 @@ class ZipArchiver
      * @param \Composer\IO\IOInterface|null $io
      * @throws \Exception
      */
-    private static function updateVersion($zipFile, $subDirectory, $version, $io)
-    {
+    private static function updateVersion(
+        $zipFile,
+        $subDirectory,
+        $version,
+        $io,
+    ) {
         $archive = new \ZipArchive();
 
         if ($archive->open($zipFile) !== true) {
-            throw new \Exception('Impossible to update Composer version in composer.json');
+            throw new \Exception(
+                'Impossible to update Composer version in composer.json',
+            );
         }
 
-        $filePath = ($subDirectory ? $subDirectory . '/' : '') . 'composer.json';
+        $filePath =
+            ($subDirectory ? $subDirectory . '/' : '') . 'composer.json';
 
         $content = json_decode($archive->getFromName($filePath));
 
         if ($content === false || $content === null) {
-            $io->write('No composer.json file in the archive (path: ' . $filePath . ')', true, IOInterface::VERBOSE);
+            $io->write(
+                'No composer.json file in the archive (path: ' .
+                    $filePath .
+                    ')',
+                true,
+                IOInterface::VERBOSE,
+            );
             return;
         }
 
@@ -128,7 +155,10 @@ class ZipArchiver
 
         $archive->deleteName($filePath);
 
-        $archive->addFromString($filePath, json_encode($content, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+        $archive->addFromString(
+            $filePath,
+            json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
+        );
 
         $archive->close();
     }

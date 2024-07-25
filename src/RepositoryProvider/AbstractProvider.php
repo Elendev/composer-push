@@ -2,11 +2,13 @@
 
 namespace Elendev\ComposerPush\RepositoryProvider;
 
+use Composer\IO\ConsoleIO;
 use Composer\IO\IOInterface;
 use Elendev\ComposerPush\Configuration;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 abstract class AbstractProvider
 {
@@ -25,26 +27,21 @@ abstract class AbstractProvider
      */
     private $io;
 
-    /**
-     * @var \Symfony\Component\Console\Helper\ProgressBar|null
-     */
-    private $progress = null;
-
-    public function __construct(Configuration $configuration, IOInterface $io, Client $client = null)
-    {
+    public function __construct(
+        Configuration $configuration,
+        IOInterface $io,
+        Client $client = null,
+    ) {
         $this->configuration = $configuration;
         $this->io = $io;
         $this->client = $client;
-        if (method_exists($io, 'getProgressBar')) {
-            $this->progress = $io->getProgressBar();
-        }
     }
 
     /**
      * Get the URL used for the provider
-     * @return mixed
+     * @return string
      */
-    abstract public function getUrl();
+    abstract public function getUrl(): string;
 
     /**
      * Try to send a file with the given username/password. If the credentials
@@ -56,9 +53,8 @@ abstract class AbstractProvider
      * @param string $filePath path to the file to send
      * @throws \Exception
      */
-    public function sendFile(
-        $filePath
-    ) {
+    public function sendFile(string $filePath): void
+    {
         $username = $this->getConfiguration()->getOptionUsername();
         $password = $this->getConfiguration()->getOptionPassword();
 
@@ -68,7 +64,10 @@ abstract class AbstractProvider
         } else {
             $credentials = [];
 
-            if ($this->getConfiguration()->get('username') !== null && $this->getConfiguration()->get('password')) {
+            if (
+                $this->getConfiguration()->get('username') !== null &&
+                $this->getConfiguration()->get('password')
+            ) {
                 $credentials['extra'] = [
                     'username' => $this->getConfiguration()->get('username'),
                     'password' => $this->getConfiguration()->get('password'),
@@ -76,14 +75,19 @@ abstract class AbstractProvider
             }
 
             if ($this->getConfiguration()->getAccessToken()) {
-                $credentials['access_token']['token'] = $this->getConfiguration()->getAccessToken();
+                $credentials['access_token'][
+                    'token'
+                ] = $this->getConfiguration()->getAccessToken();
             }
 
-            if (preg_match(
-                '{^(?:https?)://([^/]+)(?:/.*)?}',
-                $this->getUrl(),
-                $match
-            ) && $this->getIO()->hasAuthentication($match[1])) {
+            if (
+                preg_match(
+                    '{^(?:https?)://([^/]+)(?:/.*)?}',
+                    $this->getUrl(),
+                    $match,
+                ) &&
+                $this->getIO()->hasAuthentication($match[1])
+            ) {
                 $auth = $this->getIO()->getAuthentication($match[1]);
                 $credentials['auth.json'] = [
                     'username' => $auth['username'],
@@ -95,41 +99,43 @@ abstract class AbstractProvider
             $credentials['none'] = [];
 
             foreach ($credentials as $type => $credential) {
-                $this->getIO()
-                    ->write(
-                        '[postFile] Trying credentials ' . $type,
-                        true,
-                        IOInterface::VERY_VERBOSE
-                    );
+                $this->getIO()->write(
+                    '[postFile] Trying credentials ' . $type,
+                    true,
+                    IOInterface::VERY_VERBOSE,
+                );
 
                 try {
                     if (!empty($credential['token'])) {
-                        $this->getIO()
-                            ->write(
-                                '[postFile] Use ' . $type,
-                                true,
-                                IOInterface::VERY_VERBOSE
-                            );
-                        $this->postFileWithToken($filePath, $credential['token']);
-                    } elseif (!empty($credential['username']) && !empty($credential['password'])) {
-                        $this->getIO()
-                            ->write(
-                                '[postFile] Use user ' . $credential['username'],
-                                true,
-                                IOInterface::VERY_VERBOSE
-                            );
+                        $this->getIO()->write(
+                            '[postFile] Use ' . $type,
+                            true,
+                            IOInterface::VERY_VERBOSE,
+                        );
+                        $this->postFileWithToken(
+                            $filePath,
+                            $credential['token'],
+                        );
+                    } elseif (
+                        !empty($credential['username']) &&
+                        !empty($credential['password'])
+                    ) {
+                        $this->getIO()->write(
+                            '[postFile] Use user ' . $credential['username'],
+                            true,
+                            IOInterface::VERY_VERBOSE,
+                        );
                         $this->postFile(
                             $filePath,
                             $credential['username'],
-                            $credential['password']
+                            $credential['password'],
                         );
                     } else {
-                        $this->getIO()
-                            ->write(
-                                '[postFile] Use no credentials',
-                                true,
-                                IOInterface::VERY_VERBOSE
-                            );
+                        $this->getIO()->write(
+                            '[postFile] Use no credentials',
+                            true,
+                            IOInterface::VERY_VERBOSE,
+                        );
                         $this->postFile($filePath);
                     }
 
@@ -137,54 +143,59 @@ abstract class AbstractProvider
                 } catch (ClientException $e) {
                     if ($e->getResponse()->getStatusCode() === '401') {
                         if ($type === 'none') {
-                            $this->getIO()
-                                ->write(
-                                    'Unable to push on server (authentication required)',
-                                    true,
-                                    IOInterface::VERY_VERBOSE
-                                );
+                            $this->getIO()->write(
+                                'Unable to push on server (authentication required)',
+                                true,
+                                IOInterface::VERY_VERBOSE,
+                            );
                         } else {
-                            $this->getIO()
-                                ->write(
-                                    'Unable to authenticate on server with credentials ' . $type,
-                                    true,
-                                    IOInterface::VERY_VERBOSE
-                                );
+                            $this->getIO()->write(
+                                'Unable to authenticate on server with credentials ' .
+                                    $type,
+                                true,
+                                IOInterface::VERY_VERBOSE,
+                            );
                         }
                     } else {
-                        $this->getIO()
-                            ->writeError(
-                                'A network error occured while trying to upload to the server: ' . $e->getMessage(),
-                                true,
-                                IOInterface::QUIET
-                            );
+                        $this->getIO()->writeError(
+                            'A network error occured while trying to upload to the server: ' .
+                                $e->getMessage(),
+                            true,
+                            IOInterface::QUIET,
+                        );
                     }
                 }
             }
         }
 
-        throw new \Exception('Impossible to push to remote repository, use -vvv to have more details');
+        throw new \Exception(
+            'Impossible to push to remote repository, use -vvv to have more details',
+        );
     }
 
     /**
      * Process the API call
-     * @param $file file to upload
-     * @param $options http call options
+     *
+     * @param string $file file to upload
+     * @param array $options http call options
      */
-    abstract protected function apiCall($file, $options);
+    abstract protected function apiCall(string $file, array $options): void;
 
     /**
      * The file has to be uploaded by hand because of composer limitations
      * (impossible to use Guzzle functions.php file in a composer plugin).
      *
-     * @param $file
-     * @param $username
-     * @param $password
+     * @param string $file
+     * @param string $username
+     * @param string $password
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    protected function postFile($file, $username = null, $password = null)
-    {
+    protected function postFile(
+        string $file,
+        string $username = null,
+        string $password = null,
+    ): void {
         $options = [];
 
         if (!empty($username) && !empty($password)) {
@@ -196,11 +207,11 @@ abstract class AbstractProvider
 
     /**
      * Post the given file with access token
-     * @param $file
+     * @param string $file
      * @param string $token
-     * @return mixed
+     * @return void
      */
-    protected function postFileWithToken($file, $token)
+    protected function postFileWithToken(string $file, string $token): void
     {
         $options = [];
         $options['headers']['Authorization'] = 'Bearer ' . $token;
@@ -210,7 +221,7 @@ abstract class AbstractProvider
     /**
      * @return Configuration
      */
-    protected function getConfiguration()
+    protected function getConfiguration(): Configuration
     {
         return $this->configuration;
     }
@@ -218,20 +229,20 @@ abstract class AbstractProvider
     /**
      * @return IOInterface
      */
-    protected function getIO()
+    protected function getIO(): IOInterface
     {
         return $this->io;
     }
 
     /**
      * @throws FileNotFoundException
-     * @return \GuzzleHttp\Client|\GuzzleHttp\ClientInterface
+     * @return \GuzzleHttp\ClientInterface
      */
-    protected function getClient()
+    protected function getClient(): \GuzzleHttp\ClientInterface
     {
         if (empty($this->client)) {
             $this->client = new Client([
-                'verify' => $this->configuration->getVerifySsl()
+                'verify' => $this->configuration->getVerifySsl(),
             ]);
         }
         return $this->client;
@@ -240,44 +251,38 @@ abstract class AbstractProvider
     /**
      * Return the Progress Callback for Guzzle
      *
-     * @return callback
+     * @param ProgressBar $progressBar
+     *
+     * @return \Closure(mixed $downloadTotal, mixed $downloadedBytes, mixed $uploadTotal, mixed $uploadedBytes): void
      */
-    protected function getProgressCallback()
-    {
-        if ($this->progress === null) {
-            return function (
-                $downloadTotal,
-                $downloadedBytes,
-                $uploadTotal,
-                $uploadedBytes
-            ) {
-                //Do nothing
-            };
-        }
+    protected static function progressBarCallback(
+        ProgressBar $progressBar,
+    ): \Closure {
         return function (
             $downloadTotal,
             $downloadedBytes,
             $uploadTotal,
-            $uploadedBytes
-        ) {
+            $uploadedBytes,
+        ) use ($progressBar) {
             if ($uploadTotal === 0) {
                 return;
             }
             if ($uploadedBytes === 0) {
-                $this->progress->start(100);
+                $progressBar->start(100);
                 return;
             }
 
             if ($uploadedBytes === $uploadTotal) {
-                if ($this->progress->getProgress() != 100) {
-                    $this->progress->setProgress(100);
-                    $this->progress->finish();
-                    $this->getIO()->write('');
+                if ($progressBar->getProgress() != 100) {
+                    $progressBar->setProgress(100);
+                    $progressBar->finish();
                 }
                 return;
             }
 
-            $this->progress->setProgress((int) (($uploadedBytes / $uploadTotal) * 100));
+            $progressBar->setProgress(
+                (int) (($uploadedBytes / $uploadTotal) * 100),
+            );
         };
     }
 }

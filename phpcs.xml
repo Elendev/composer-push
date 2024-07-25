@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<ruleset name="Custom Standard" namespace="MyProject\CS\Standard">
+	<!-- https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-Ruleset -->
+	<description>ClearlyIP coding standards</description>
+	<file>./src</file>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/tests/*</exclude-pattern>
+	<arg value="sp"/>
+
+	<rule ref="PSR12"/>
+
+	<!-- phpcs-type-sniff configuration -->
+	<!-- <rule ref="./vendor/gskema/phpcs-type-sniff/src/Sniffs/CompositeCodeElementSniff.php"/> -->
+
+	<rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+		<!-- PHPCS is broken with readonly classes -->
+		<exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
+	</rule>
+
+	<rule ref="PSR12.Files.FileHeader">
+		<!-- This is also broken as a result of PHPCS -->
+		<exclude name="PSR12.Files.FileHeader.SpacingAfterBlocks"/>
+		<exclude name="PSR12.Files.FileHeader.SpacingAfterBlock"/>
+		<exclude name="PSR12.Files.FileHeader.IncorrectOrder"/>
+	</rule>
+
+	<rule ref="Generic.Files.LineLength.TooLong">
+		<!-- This is enforced by prettier -->
+		<exclude name="Generic.Files.LineLength.TooLong"/>
+	</rule>
+
+		<rule ref="Generic.WhiteSpace.DisallowTabIndent">
+		<!-- https://www.youtube.com/watch?v=SsoOG6ZeyUI -->
+		<exclude name="Generic.WhiteSpace.DisallowTabIndent.TabsUsed"/>
+	</rule>
+
+	<rule ref="Squiz.ControlStructures.ForEachLoopDeclaration">
+		<!-- This will break as a result of prettier so dont enforce it -->
+		<exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.SpacingBeforeAs" />
+	</rule>
+
+	<rule ref="Squiz.ControlStructures.ControlSignature">
+		<!-- This will break as a result of prettier so dont enforce it -->
+		<exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseBrace" />
+	</rule>
+
+	<rule ref="Squiz.Functions.MultiLineFunctionDeclaration">
+		<!-- This will break as a result of prettier so dont enforce it -->
+		<exclude name="Squiz.Functions.MultiLineFunctionDeclaration.OneParamPerLine" />
+		<exclude name="Squiz.Functions.MultiLineFunctionDeclaration.UseOneParamPerLine" />
+	</rule>
+
+	<rule ref="Generic.WhiteSpace.DisallowTabIndent">
+		<exclude name="Generic.WhiteSpace.DisallowTabIndent.TabsUsed" />
+	</rule>
+</ruleset>

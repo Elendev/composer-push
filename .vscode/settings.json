@@ -1,0 +1,32 @@
+{
+	// I recommend to disable VS Code's built-in PHP IntelliSense by setting php.suggest.basic to false to avoid duplicate suggestions.
+	"php.suggest.basic": false,
+	"editor.formatOnSave": true,
+	"[php]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"workbench.colorCustomizations": {},
+	"taskExplorer.pathToMake": "make",
+	"coverage-gutters.showLineCoverage": true,
+	"coverage-gutters.showRulerCoverage": true,
+	"coverage-gutters.coverageBaseDir": "output/**",
+	"php.validate.enable": false,
+	"php.problems.excludeGitIgnore": true,
+	"php.format.codeStyle": "Off",
+	"php.format.rules.forStatementWrap": "off",
+	"php.format.rules.whileStatementNewLineAfterLeftParen": false,
+	"php.problems.exclude": {
+		"/": true
+	},
+	"php.problems.scope": "none",
+	"psalm.configPaths": ["psalm.xml"],
+	"psalm.psalmScriptPath": "vendor/bin/psalm-language-server",
+	"phpCodeSniffer.exec.linux": "vendor/bin/phpcs",
+	"phpCodeSniffer.standard": "Custom",
+	"phpCodeSniffer.standardCustom": "phpcs.xml",
+	"psalm.psalmScriptArgs": [
+		"--on-change-debounce-ms=500",
+		"--show-diagnostic-warnings=false"
+	],
+	"intelephense.environment.phpVersion": "8.2.0"
+}

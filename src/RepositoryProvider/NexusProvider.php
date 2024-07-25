@@ -2,23 +2,29 @@
 
 namespace Elendev\ComposerPush\RepositoryProvider;
 
+use Composer\IO\ConsoleIO;
+
 class NexusProvider extends AbstractProvider
 {
     /**
-     * @return string URL to the repository
+     * {@inheritDoc}
      */
-    public function getUrl()
+    public function getUrl(): string
     {
         $url = $this->getConfiguration()->getUrl();
         $name = $this->getConfiguration()->getPackageName();
         $version = $this->getConfiguration()->getVersion();
 
         if (empty($url)) {
-            throw new \InvalidArgumentException('The option --url is required or has to be provided as an extra argument in composer.json');
+            throw new \InvalidArgumentException(
+                'The option --url is required or has to be provided as an extra argument in composer.json',
+            );
         }
 
         if (empty($version)) {
-            throw new \InvalidArgumentException('The version argument is required');
+            throw new \InvalidArgumentException(
+                'The version argument is required',
+            );
         }
 
         // Remove trailing slash from URL
@@ -28,11 +34,9 @@ class NexusProvider extends AbstractProvider
     }
 
     /**
-     * Process the API call
-     * @param $file file to upload
-     * @param $options http call options
+     * {@inheritDoc}
      */
-    protected function apiCall($file, $options)
+    protected function apiCall(string $file, array $options): void
     {
         $url = $this->getUrl();
 
@@ -40,33 +44,42 @@ class NexusProvider extends AbstractProvider
         $sourceUrl = $this->getConfiguration()->getSourceUrl();
         $sourceReference = $this->getConfiguration()->getSourceReference();
 
-        $options['debug'] = $this->getIO()->isVeryVerbose();
+        $io = $this->getIO();
+        $options['debug'] = $io->isVeryVerbose();
 
-        if (!empty($sourceType) && !empty($sourceUrl) && !empty($sourceReference)) {
+        if ($io instanceof ConsoleIO) {
+            $options['progress'] = static::progressBarCallback(
+                $io->getProgressBar(),
+            );
+        }
+
+        if (
+            !empty($sourceType) &&
+            !empty($sourceUrl) &&
+            !empty($sourceReference)
+        ) {
             $options['multipart'] = [
                 [
                     'Content-Type' => 'application/zip',
                     'name' => 'package',
-                    'contents' => fopen($file, 'r')
+                    'contents' => fopen($file, 'r'),
                 ],
                 [
                     'name' => 'src-type',
-                    'contents' => $sourceType
+                    'contents' => $sourceType,
                 ],
                 [
                     'name' => 'src-url',
-                    'contents' => $sourceUrl
+                    'contents' => $sourceUrl,
                 ],
                 [
                     'name' => 'src-ref',
-                    'contents' => $sourceReference
-                ]
+                    'contents' => $sourceReference,
+                ],
             ];
         } else {
             $options['body'] = fopen($file, 'r');
         }
-
-        $options['progress'] = $this->getProgressCallback();
 
         $this->getClient()->request('PUT', $url, $options);
     }

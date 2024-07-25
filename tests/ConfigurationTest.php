@@ -26,7 +26,6 @@ class ConfigurationTest extends TestCase
      */
     private $composerMock;
 
-
     /**
      * @var Set of values used by the mocks
      */
@@ -37,6 +36,7 @@ class ConfigurationTest extends TestCase
     private $configOptionUrl;
 
     private $singleConfig;
+    private $configName;
     private $repository;
 
     private $configType;
@@ -51,7 +51,7 @@ class ConfigurationTest extends TestCase
         $this->configIgnore = [];
         $this->composerPackageArchiveExcludes = [];
         $this->configIgnoreByComposer = null;
-        $this->configOptionUrl = "https://option-url.com";
+        $this->configOptionUrl = 'https://option-url.com';
 
         $this->singleConfig = true;
         $this->configName = null;
@@ -65,24 +65,27 @@ class ConfigurationTest extends TestCase
         $this->initGlobalConfiguration();
     }
 
-
     public function testGetVersion()
     {
-        $this->inputMock->method('getArgument')->willReturnCallback(function ($argument) {
-            if ($argument === 'version') {
-                return '1.0.1';
-            }
-        });
+        $this->inputMock
+            ->method('getArgument')
+            ->willReturnCallback(function ($argument) {
+                if ($argument === 'version') {
+                    return '1.0.1';
+                }
+            });
         $this->assertEquals('1.0.1', $this->configuration->getVersion());
     }
 
     public function testGetVersionComposeJson()
     {
-        $this->inputMock->method('getArgument')->willReturnCallback(function ($argument) {
-            if ($argument === 'version') {
-                return null;
-            }
-        });
+        $this->inputMock
+            ->method('getArgument')
+            ->willReturnCallback(function ($argument) {
+                if ($argument === 'version') {
+                    return null;
+                }
+            });
         $this->assertEquals('1.2.3', $this->configuration->getVersion());
     }
 
@@ -93,7 +96,10 @@ class ConfigurationTest extends TestCase
 
     public function testGetSourceType()
     {
-        $this->assertEquals('my-src-type', $this->configuration->getSourceType());
+        $this->assertEquals(
+            'my-src-type',
+            $this->configuration->getSourceType(),
+        );
     }
 
     public function testGetAccessToken()
@@ -103,12 +109,18 @@ class ConfigurationTest extends TestCase
 
     public function testGetUrl()
     {
-        $this->assertEquals('https://option-url.com', $this->configuration->getUrl());
+        $this->assertEquals(
+            'https://option-url.com',
+            $this->configuration->getUrl(),
+        );
 
         $this->configOptionUrl = null;
         $this->initGlobalConfiguration();
 
-        $this->assertEquals('https://example.com', $this->configuration->getUrl());
+        $this->assertEquals(
+            'https://example.com',
+            $this->configuration->getUrl(),
+        );
     }
 
     public function testGetVerifySsl()
@@ -141,23 +153,44 @@ class ConfigurationTest extends TestCase
 
     public function testGet()
     {
-        $this->assertEquals('https://example.com', $this->configuration->get('url'));
-        $this->assertEquals('push-username', $this->configuration->get('username'));
-        $this->assertEquals('push-password', $this->configuration->get('password'));
+        $this->assertEquals(
+            'https://example.com',
+            $this->configuration->get('url'),
+        );
+        $this->assertEquals(
+            'push-username',
+            $this->configuration->get('username'),
+        );
+        $this->assertEquals(
+            'push-password',
+            $this->configuration->get('password'),
+        );
 
         $this->singleConfig = false;
         $this->repository = 'A';
 
         $this->initGlobalConfiguration();
         $this->assertEquals('https://a.com', $this->configuration->get('url'));
-        $this->assertEquals('push-username-a', $this->configuration->get('username'));
-        $this->assertEquals('push-password-a', $this->configuration->get('password'));
+        $this->assertEquals(
+            'push-username-a',
+            $this->configuration->get('username'),
+        );
+        $this->assertEquals(
+            'push-password-a',
+            $this->configuration->get('password'),
+        );
 
         $this->repository = 'B';
         $this->initGlobalConfiguration();
         $this->assertEquals('https://b.com', $this->configuration->get('url'));
-        $this->assertEquals('push-username-b', $this->configuration->get('username'));
-        $this->assertEquals('push-password-b', $this->configuration->get('password'));
+        $this->assertEquals(
+            'push-username-b',
+            $this->configuration->get('username'),
+        );
+        $this->assertEquals(
+            'push-password-b',
+            $this->configuration->get('password'),
+        );
 
         $this->repository = null;
         $this->initGlobalConfiguration();
@@ -168,92 +201,112 @@ class ConfigurationTest extends TestCase
 
     public function testGetIgnores()
     {
-        $this->assertArrayEquals([
-            "option-dir1",
-            "option-dir2",
-            "vendor/"
-        ], $this->configuration->getIgnores());
+        $this->assertArrayEquals(
+            ['option-dir1', 'option-dir2', 'vendor/'],
+            $this->configuration->getIgnores(),
+        );
 
         $this->keepVendor = true;
         $this->initGlobalConfiguration();
 
-        $this->assertArrayEquals([
-            "option-dir1",
-            "option-dir2"
-        ], $this->configuration->getIgnores());
+        $this->assertArrayEquals(
+            ['option-dir1', 'option-dir2'],
+            $this->configuration->getIgnores(),
+        );
 
         $this->keepVendor = false;
-        $this->configIgnore = ["config-dir1", "config-dir2", "config-dir3"];
+        $this->configIgnore = ['config-dir1', 'config-dir2', 'config-dir3'];
 
         $this->initGlobalConfiguration();
 
-        $this->assertArrayEquals([
-            "option-dir1",
-            "option-dir2",
-            "vendor/",
-            "config-dir1",
-            "config-dir2",
-            "config-dir3",
-        ], $this->configuration->getIgnores());
+        $this->assertArrayEquals(
+            [
+                'option-dir1',
+                'option-dir2',
+                'vendor/',
+                'config-dir1',
+                'config-dir2',
+                'config-dir3',
+            ],
+            $this->configuration->getIgnores(),
+        );
 
-        $this->composerPackageArchiveExcludes = ["my-package1", "my-package2"];
+        $this->composerPackageArchiveExcludes = ['my-package1', 'my-package2'];
         $this->initGlobalConfiguration();
 
-        $this->assertArrayEquals([
-            "option-dir1",
-            "option-dir2",
-            "vendor/",
-            "config-dir1",
-            "config-dir2",
-            "config-dir3",
-        ], $this->configuration->getIgnores());
+        $this->assertArrayEquals(
+            [
+                'option-dir1',
+                'option-dir2',
+                'vendor/',
+                'config-dir1',
+                'config-dir2',
+                'config-dir3',
+            ],
+            $this->configuration->getIgnores(),
+        );
 
         $this->configIgnoreByComposer = true;
         $this->initGlobalConfiguration();
 
-        $this->assertArrayEquals([
-            "option-dir1",
-            "option-dir2",
-            "vendor/",
-            "config-dir1",
-            "config-dir2",
-            "config-dir3",
-            "my-package1",
-            "my-package2"
-        ], $this->configuration->getIgnores());
+        $this->assertArrayEquals(
+            [
+                'option-dir1',
+                'option-dir2',
+                'vendor/',
+                'config-dir1',
+                'config-dir2',
+                'config-dir3',
+                'my-package1',
+                'my-package2',
+            ],
+            $this->configuration->getIgnores(),
+        );
     }
 
     public function testGetSourceReference()
     {
-        $this->assertEquals('my-src-ref', $this->configuration->getSourceReference());
+        $this->assertEquals(
+            'my-src-ref',
+            $this->configuration->getSourceReference(),
+        );
     }
 
     public function testGetOptionPassword()
     {
-        $this->assertEquals("my-password", $this->configuration->getOptionPassword());
+        $this->assertEquals(
+            'my-password',
+            $this->configuration->getOptionPassword(),
+        );
     }
 
     public function testGetType()
     {
-        $this->assertEquals("nexus", $this->configuration->getType());
+        $this->assertEquals('nexus', $this->configuration->getType());
 
         $this->extraConfigType = 'jfrog';
         $this->initGlobalConfiguration();
-        $this->assertEquals("jfrog", $this->configuration->getType());
+        $this->assertEquals('jfrog', $this->configuration->getType());
 
         $this->configType = 'other-type';
         $this->initGlobalConfiguration();
-        $this->assertEquals("other-type", $this->configuration->getType());
+        $this->assertEquals('other-type', $this->configuration->getType());
     }
 
     public function testGetPackageName()
     {
-        $this->assertEquals('composer-push-name', $this->configuration->getPackageName());
+        $this->assertEquals(
+            'composer-push-name',
+            $this->configuration->getPackageName(),
+        );
     }
 
     public function testGetOptionUsername()
     {
-        $this->assertEquals("my-username", $this->configuration->getOptionUsername());
+        $this->assertEquals(
+            'my-username',
+            $this->configuration->getOptionUsername(),
+        );
     }
 
     private function createInputMock()
@@ -262,21 +315,21 @@ class ConfigurationTest extends TestCase
         $input->method('getOption')->willReturnCallback(function ($argument) {
             switch ($argument) {
                 case 'name':
-                    return "composer-push-name";
+                    return 'composer-push-name';
                 case 'url':
                     return $this->configOptionUrl;
                 case 'src-type':
-                    return "my-src-type";
+                    return 'my-src-type';
                 case 'src-url':
-                    return "my-src-url";
+                    return 'my-src-url';
                 case 'src-ref':
-                    return "my-src-ref";
+                    return 'my-src-ref';
                 case 'username':
-                    return "my-username";
+                    return 'my-username';
                 case 'password':
-                    return "my-password";
+                    return 'my-password';
                 case 'ignore':
-                    return ["option-dir1", "option-dir2"];
+                    return ['option-dir1', 'option-dir2'];
                 case 'keep-vendor':
                     return $this->keepVendor;
                 case 'ignore-by-composer':
@@ -299,7 +352,11 @@ class ConfigurationTest extends TestCase
     {
         $this->inputMock = $this->createInputMock();
         $this->composerMock = $this->createComposerMock();
-        $this->configuration = new Configuration($this->inputMock, $this->composerMock, new NullIO());
+        $this->configuration = new Configuration(
+            $this->inputMock,
+            $this->composerMock,
+            new NullIO(),
+        );
     }
 
     private function createComposerMock()
@@ -310,17 +367,17 @@ class ConfigurationTest extends TestCase
         $composer->method('getPackage')->willReturn($packageInterface);
 
         $packageInterface->method('getVersion')->willReturn('1.2.3');
-        $packageInterface->method('getExtra')->willReturnCallback(function() {
+        $packageInterface->method('getExtra')->willReturnCallback(function () {
             if ($this->singleConfig) {
                 return [
                     'push' => [
                         'url' => 'https://example.com',
-                        "username" => "push-username",
-                        "password" => "push-password",
-                        "ignore" => $this->configIgnore,
-                        "type" => $this->extraConfigType,
-                        "ssl-verify" => $this->extraVerifySsl,
-                    ]
+                        'username' => 'push-username',
+                        'password' => 'push-password',
+                        'ignore' => $this->configIgnore,
+                        'type' => $this->extraConfigType,
+                        'ssl-verify' => $this->extraVerifySsl,
+                    ],
                 ];
             } else {
                 return [
@@ -328,24 +385,25 @@ class ConfigurationTest extends TestCase
                         [
                             'name' => 'A',
                             'url' => 'https://a.com',
-                            "username" => "push-username-a",
-                            "password" => "push-password-a",
+                            'username' => 'push-username-a',
+                            'password' => 'push-password-a',
                         ],
                         [
                             'name' => 'B',
                             'url' => 'https://b.com',
-                            "username" => "push-username-b",
-                            "password" => "push-password-b",
-                        ]
-                    ]
+                            'username' => 'push-username-b',
+                            'password' => 'push-password-b',
+                        ],
+                    ],
                 ];
             }
-
         });
 
-        $packageInterface->method('getArchiveExcludes')->willReturnCallback(function() {
-            return $this->composerPackageArchiveExcludes;
-        });
+        $packageInterface
+            ->method('getArchiveExcludes')
+            ->willReturnCallback(function () {
+                return $this->composerPackageArchiveExcludes;
+            });
 
         return $composer;
     }
@@ -353,12 +411,11 @@ class ConfigurationTest extends TestCase
     private function assertArrayEquals($expected, $result)
     {
         try {
-
             $this->assertSameSize($expected, $result);
         } catch (ExpectationFailedException $e) {
-            echo " Expected: ";
+            echo ' Expected: ';
             print_r($expected);
-            echo " Received: ";
+            echo ' Received: ';
             print_r($result);
             throw $e;
         }

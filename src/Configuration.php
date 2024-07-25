@@ -4,6 +4,7 @@ namespace Elendev\ComposerPush;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
+use Elendev\ComposerPush\Exceptions\InvalidConfigException;
 use Symfony\Component\Console\Input\InputInterface;
 
 class Configuration
@@ -30,8 +31,11 @@ class Configuration
 
     public const PUSH_CFG_NAME = 'name';
 
-    public function __construct(InputInterface $input, Composer $composer, IOInterface $io)
-    {
+    public function __construct(
+        InputInterface $input,
+        Composer $composer,
+        IOInterface $io,
+    ) {
         $this->input = $input;
         $this->composer = $composer;
         $this->io = $io;
@@ -39,17 +43,23 @@ class Configuration
 
     /**
      * Get the Nexus extra values if available
-     * @param $parameter
-     * @param null $default
-     * @return mixed|null
+     * @param string $parameter
+     * @param mixed $default
+     * @return mixed
      */
-    public function get($parameter, $default = null)
+    public function get(string $parameter, mixed $default = null): mixed
     {
         if ($this->config === null) {
-            $this->config = $this->parseNexusExtra($this->input, $this->composer);
+            $this->config = $this->parseNexusExtra(
+                $this->input,
+                $this->composer,
+            );
         }
 
-        if (array_key_exists($parameter, $this->config) && $this->config[$parameter] !== null) {
+        if (
+            array_key_exists($parameter, $this->config) &&
+            $this->config[$parameter] !== null
+        ) {
             return $this->config[$parameter];
         } else {
             return $default;
@@ -59,24 +69,23 @@ class Configuration
     /**
      * Return the package name based on the given name or the real package name.
      *
-     * @param \Symfony\Component\Console\Input\InputInterface|null $input
-     *
      * @return string
      */
-    public function getPackageName()
+    public function getPackageName(): string
     {
         if ($this->input && $this->input->getOption('name')) {
             return $this->input->getOption('name');
-        } else {
-            return $this->composer->getPackage()->getName();
         }
+
+        return $this->composer->getPackage()->getName();
     }
 
     /**
      * Return the repository URL, based on the configuration or the user input
+     *
      * @return string
      */
-    public function getUrl()
+    public function getUrl(): string
     {
         $url = $this->input->getOption('url');
 
@@ -84,7 +93,9 @@ class Configuration
             $url = $this->get('url');
 
             if (empty($url)) {
-                throw new \InvalidArgumentException('The option --url is required or has to be provided as an extra argument in composer.json');
+                throw new \InvalidArgumentException(
+                    'The option --url is required or has to be provided as an extra argument in composer.json',
+                );
             }
         }
 
@@ -94,64 +105,61 @@ class Configuration
     /**
      * Return the package version
      * If version argument is not set, will return composer.json version property
+     *
      * @return string
      */
-    public function getVersion()
+    public function getVersion(): string
     {
         $versionArgument = $this->input->getArgument('version');
-        return empty($versionArgument) ? $this->composer->getPackage()->getVersion() : $versionArgument;
+        return empty($versionArgument)
+            ? $this->composer->getPackage()->getVersion()
+            : $versionArgument;
     }
 
     /**
      * Return the source type
-     * @return bool|string|string[]|null
      */
-    public function getSourceType()
+    public function getSourceType(): mixed
     {
         return $this->input->getOption('src-type');
     }
 
     /**
      * Return the source URL
-     * @return bool|string|string[]|null
      */
-    public function getSourceUrl()
+    public function getSourceUrl(): mixed
     {
         return $this->input->getOption('src-url');
     }
 
     /**
      * Return the source reference
-     * @return bool|string|string[]|null
      */
-    public function getSourceReference()
+    public function getSourceReference(): mixed
     {
         return $this->input->getOption('src-ref');
     }
 
     /**
      * Return the username given in parameters during call
-     * @return string|null
      */
-    public function getOptionUsername()
+    public function getOptionUsername(): mixed
     {
         return $this->input->getOption('username');
     }
 
     /**
      * Return the password given in parameters during call
-     * @return string|null
      */
-    public function getOptionPassword()
+    public function getOptionPassword(): mixed
     {
         return $this->input->getOption('password');
     }
 
     /**
-     * Type of repository. Default: nexus (lowercase)
-     * @return string
+     * Type of repository
      */
-    public function getType()
+    public function getType(): mixed
     {
         $type = $this->input->getOption('type');
 
@@ -164,9 +172,8 @@ class Configuration
 
     /**
      * Return the access token
-     * @return string
      */
-    public function getAccessToken()
+    public function getAccessToken(): mixed
     {
         return $this->input->getOption('access-token');
     }
@@ -174,7 +181,7 @@ class Configuration
     /**
      * @return boolean
      */
-    public function getVerifySsl()
+    public function getVerifySsl(): bool
     {
         $verifySsl = $this->input->getOption('ssl-verify');
 
@@ -190,7 +197,7 @@ class Configuration
      *
      * @return array
      */
-    public function getIgnores()
+    public function getIgnores(): array
     {
         // Remove after removal of --ignore-dirs option
         $deprecatedIgnores = $this->getDirectoriesToIgnore($this->input);
@@ -198,15 +205,24 @@ class Configuration
         $optionalIgnore = $this->input->getOption('ignore');
         $composerIgnores = $this->get('ignore', []);
         $gitAttrIgnores = $this->getGitAttributesExportIgnores($this->input);
-        $composerJsonIgnores = $this->getComposerJsonArchiveExcludeIgnores($this->input);
+        $composerJsonIgnores = $this->getComposerJsonArchiveExcludeIgnores(
+            $this->input,
+        );
 
-        if (! $this->input->getOption('keep-vendor')) {
+        if (!$this->input->getOption('keep-vendor')) {
             $defaultIgnores = ['vendor/'];
         } else {
             $defaultIgnores = [];
         }
 
-        $ignore = array_merge($deprecatedIgnores, $composerIgnores, $optionalIgnore, $gitAttrIgnores, $composerJsonIgnores, $defaultIgnores);
+        $ignore = array_merge(
+            $deprecatedIgnores,
+            $composerIgnores,
+            $optionalIgnore,
+            $gitAttrIgnores,
+            $composerJsonIgnores,
+            $defaultIgnores,
+        );
         return array_unique($ignore);
     }
 
@@ -215,24 +231,34 @@ class Configuration
      * @deprecated argument has been changed to ignore
      * @return array
      */
-    private function getDirectoriesToIgnore(InputInterface $input)
+    private function getDirectoriesToIgnore(InputInterface $input): array
     {
         $optionalIgnore = $input->getOption('ignore-dirs') ?? [];
         $composerIgnores = $this->get('ignore-dirs', []);
 
         if (!empty($optionalIgnore)) {
-            $this->io->write('<error>The --ignore-dirs option has been deprecated. Please use --ignore instead</error>');
+            $this->io->write(
+                '<error>The --ignore-dirs option has been deprecated. Please use --ignore instead</error>',
+            );
         }
 
         if (!empty($composerIgnores)) {
-            $this->io->write('<error>The ignore-dirs config option has been deprecated. Please use ignore instead</error>');
+            $this->io->write(
+                '<error>The ignore-dirs config option has been deprecated. Please use ignore instead</error>',
+            );
         }
 
         $ignore = array_merge($composerIgnores, $optionalIgnore);
         return array_unique($ignore);
     }
 
-    private function getGitAttributesExportIgnores(InputInterface $input)
+    /**
+     * Retrieves the ignore patterns from the .gitattributes file if the option or extra configuration is set.
+     *
+     * @param InputInterface $input The input interface to retrieve the option from.
+     * @return array The array of ignore patterns.
+     */
+    private function getGitAttributesExportIgnores(InputInterface $input): array
     {
         $option = $input->getOption('ignore-by-git-attributes');
         $extra = $this->get('ignore-by-git-attributes', false);
@@ -252,8 +278,14 @@ class Configuration
             if ($line = trim($line)) {
                 // ignore if end with `export-ignore`
                 $diff = strlen($line) - 13;
-                if ($diff > 0 && strpos($line, 'export-ignore', $diff) !== false) {
-                    $ignores[] = trim(trim(explode(' ', $line)[0]), DIRECTORY_SEPARATOR);
+                if (
+                    $diff > 0 &&
+                    strpos($line, 'export-ignore', $diff) !== false
+                ) {
+                    $ignores[] = trim(
+                        trim(explode(' ', $line)[0]),
+                        DIRECTORY_SEPARATOR,
+                    );
                 }
             }
         }
@@ -261,8 +293,15 @@ class Configuration
         return $ignores;
     }
 
-    private function getComposerJsonArchiveExcludeIgnores(InputInterface $input)
-    {
+    /**
+     * Retrieves the archive excludes from the composer.json file, based on the given input and extra configuration.
+     *
+     * @param InputInterface $input The input interface used to retrieve the command line option.
+     * @return array The list of archive excludes, trimmed of directory separators.
+     */
+    private function getComposerJsonArchiveExcludeIgnores(
+        InputInterface $input,
+    ): array {
         $option = $input->getOption('ignore-by-composer');
         $extra = $this->get('ignore-by-composer', false);
         if (!$option && !$extra) {
@@ -270,7 +309,10 @@ class Configuration
         }
 
         $ignores = [];
-        foreach ($this->composer->getPackage()->getArchiveExcludes() as $exclude) {
+        foreach (
+            $this->composer->getPackage()->getArchiveExcludes()
+            as $exclude
+        ) {
             $ignores[] = trim($exclude, DIRECTORY_SEPARATOR);
         }
 
@@ -279,9 +321,12 @@ class Configuration
 
     /**
      * @param InputInterface $input
+     * @param Composer $composer
      */
-    private function parseNexusExtra(InputInterface $input, Composer $composer)
-    {
+    private function parseNexusExtra(
+        InputInterface $input,
+        Composer $composer,
+    ): mixed {
         $this->checkNexusPushValid($input, $composer);
 
         $repository = $input->getOption(PushCommand::REPOSITORY);
@@ -292,7 +337,9 @@ class Configuration
         if (empty($extras['push'])) {
             if (!empty($extras['nexus-push'])) {
                 $extrasConfigurationKey = 'nexus-push';
-                $this->io->warning('Configuration under extra - nexus-push in composer.json is deprecated, please replace it by extra - push');
+                $this->io->warning(
+                    'Configuration under extra - nexus-push in composer.json is deprecated, please replace it by extra - push',
+                );
             }
         }
 
@@ -303,34 +350,63 @@ class Configuration
             }
         } else {
             // configurations in composer.json support upload to multi repository
-            foreach ($extras[$extrasConfigurationKey] as $key=> $nexusPushConfigItem) {
+            foreach (
+                $extras[$extrasConfigurationKey]
+                as $key => $nexusPushConfigItem
+            ) {
                 if (empty($nexusPushConfigItem[self::PUSH_CFG_NAME])) {
-                    $fmt = 'The push configuration array in composer.json with index {%s} need provide value for key "%s"';
+                    $fmt =
+                        'The push configuration array in composer.json with index {%s} need provide value for key "%s"';
                     $exceptionMsg = sprintf($fmt, $key, self::PUSH_CFG_NAME);
                     throw new InvalidConfigException($exceptionMsg);
                 }
-                if ($nexusPushConfigItem[self::PUSH_CFG_NAME] ==$repository) {
+                if ($nexusPushConfigItem[self::PUSH_CFG_NAME] == $repository) {
                     return $nexusPushConfigItem;
                 }
             }
 
+            /*
             if (empty($this->nexusPushConfig)) {
-                throw new \InvalidArgumentException('The value of option --repository match no push configuration, please check');
+                throw new \InvalidArgumentException(
+                    'The value of option --repository match no push configuration, please check',
+                );
             }
+                */
         }
 
         return [];
     }
 
-    private function checkNexusPushValid(InputInterface $input, Composer $composer)
-    {
+    /**
+     * Checks if the Nexus push configuration is valid based on the provided input and composer package.
+     *
+     * @param InputInterface $input The input interface containing the command line options.
+     * @param Composer $composer The Composer package object.
+     * @throws \InvalidArgumentException If the option --repository is required when configurations in composer.json support upload to multi repository.
+     * @throws InvalidConfigException If the option --repository is offered but configurations in composer.json doesn't support upload to multi repository.
+     */
+    private function checkNexusPushValid(
+        InputInterface $input,
+        Composer $composer,
+    ) {
         $repository = $input->getOption(PushCommand::REPOSITORY);
         $extras = $composer->getPackage()->getExtra();
-        if (empty($repository) && (!empty($extras['push'][0]) || !empty($extras['nexus-push'][0]))) {
-            throw new \InvalidArgumentException('As configurations in composer.json support upload to multi repository, the option --repository is required');
+        if (
+            empty($repository) &&
+            (!empty($extras['push'][0]) || !empty($extras['nexus-push'][0]))
+        ) {
+            throw new \InvalidArgumentException(
+                'As configurations in composer.json support upload to multi repository, the option --repository is required',
+            );
         }
-        if (!empty($repository) && empty($extras['push'][0]) && empty($extras['nexus-push'][0])) {
-            throw new InvalidConfigException('the option --repository is offered, but configurations in composer.json doesn\'t support upload to multi repository, please check');
+        if (
+            !empty($repository) &&
+            empty($extras['push'][0]) &&
+            empty($extras['nexus-push'][0])
+        ) {
+            throw new InvalidConfigException(
+                'the option --repository is offered, but configurations in composer.json doesn\'t support upload to multi repository, please check',
+            );
         }
     }
 }

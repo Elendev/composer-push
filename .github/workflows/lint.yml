@@ -1,0 +1,18 @@
+name: Lint
+on:
+    workflow_call:
+
+jobs:
+    lint:
+        name: PHPUnit testing
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.3
+                  tools: composer
+                  extensions: curl, zip
+            - run: composer install
+            - run: composer phpcs
+            - run: composer psalm

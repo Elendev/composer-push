@@ -1,6 +1,6 @@
 <?php
 
-namespace Elendev\ComposerPush;
+namespace Elendev\ComposerPush\Exceptions;
 
 class InvalidConfigException extends \LogicException
 {

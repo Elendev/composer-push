@@ -14,14 +14,16 @@ use PHPUnit\Framework\TestCase;
 
 class NexusProviderTest extends TestCase
 {
-
     public function testGetUrl()
     {
         $configurationMock = $this->createBaseConfigurationMock();
 
         $nexusProvider = new NexusProvider($configurationMock, new NullIO());
 
-        $this->assertEquals('https://example.com/my-repository/packages/upload/my-package/2.1.0', $nexusProvider->getUrl());
+        $this->assertEquals(
+            'https://example.com/my-repository/packages/upload/my-package/2.1.0',
+            $nexusProvider->getUrl(),
+        );
     }
 
     /**
@@ -31,13 +33,15 @@ class NexusProviderTest extends TestCase
     {
         $configurationMock = $this->createBaseConfigurationMock();
 
-        $mock = new MockHandler([
-            new Response(200),
-        ]);
+        $mock = new MockHandler([new Response(200)]);
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
 
-        $nexusProvider = new NexusProvider($configurationMock, new NullIO(), $client);
+        $nexusProvider = new NexusProvider(
+            $configurationMock,
+            new NullIO(),
+            $client,
+        );
 
         $nexusProvider->sendFile($this->getFilePath());
 
@@ -45,10 +49,16 @@ class NexusProviderTest extends TestCase
 
         $this->assertEquals('https', $request->getUri()->getScheme());
         $this->assertEquals('example.com', $request->getUri()->getHost());
-        $this->assertEquals('/my-repository/packages/upload/my-package/2.1.0', $request->getUri()->getPath());
+        $this->assertEquals(
+            '/my-repository/packages/upload/my-package/2.1.0',
+            $request->getUri()->getPath(),
+        );
         $this->assertEquals('PUT', $request->getMethod());
         $this->assertEmpty($request->getHeader('Authorization'));
-        $this->assertEquals('Simple test file to push.', $request->getBody()->getContents());
+        $this->assertEquals(
+            'Simple test file to push.',
+            $request->getBody()->getContents(),
+        );
     }
 
     /**
@@ -61,13 +71,15 @@ class NexusProviderTest extends TestCase
         $configurationMock->method('getOptionUsername')->willReturn('admin');
         $configurationMock->method('getOptionPassword')->willReturn('password');
 
-        $mock = new MockHandler([
-            new Response(200),
-        ]);
+        $mock = new MockHandler([new Response(200)]);
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
 
-        $nexusProvider = new NexusProvider($configurationMock, new NullIO(), $client);
+        $nexusProvider = new NexusProvider(
+            $configurationMock,
+            new NullIO(),
+            $client,
+        );
 
         $nexusProvider->sendFile($this->getFilePath());
 
@@ -75,12 +87,21 @@ class NexusProviderTest extends TestCase
 
         $this->assertEquals('https', $request->getUri()->getScheme());
         $this->assertEquals('example.com', $request->getUri()->getHost());
-        $this->assertEquals('/my-repository/packages/upload/my-package/2.1.0', $request->getUri()->getPath());
+        $this->assertEquals(
+            '/my-repository/packages/upload/my-package/2.1.0',
+            $request->getUri()->getPath(),
+        );
         $this->assertEquals('PUT', $request->getMethod());
 
-        $this->assertEquals('Basic ' . base64_encode('admin:password'), $request->getHeader('Authorization')[0]);
+        $this->assertEquals(
+            'Basic ' . base64_encode('admin:password'),
+            $request->getHeader('Authorization')[0],
+        );
 
-        $this->assertEquals('Simple test file to push.', $request->getBody()->getContents());
+        $this->assertEquals(
+            'Simple test file to push.',
+            $request->getBody()->getContents(),
+        );
     }
 
     /**
@@ -90,22 +111,26 @@ class NexusProviderTest extends TestCase
     {
         $configurationMock = $this->createBaseConfigurationMock();
 
-        $configurationMock->method('get')->willReturnCallback(function($parameter) {
-            switch($parameter) {
-                case 'username':
-                    return 'admin';
-                case 'password':
-                    return 'my-password';
-            }
-        });
+        $configurationMock
+            ->method('get')
+            ->willReturnCallback(function ($parameter) {
+                switch ($parameter) {
+                    case 'username':
+                        return 'admin';
+                    case 'password':
+                        return 'my-password';
+                }
+            });
 
-        $mock = new MockHandler([
-            new Response(200)
-        ]);
+        $mock = new MockHandler([new Response(200)]);
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
 
-        $nexusProvider = new NexusProvider($configurationMock, new NullIO(), $client);
+        $nexusProvider = new NexusProvider(
+            $configurationMock,
+            new NullIO(),
+            $client,
+        );
 
         $nexusProvider->sendFile($this->getFilePath());
 
@@ -113,12 +138,21 @@ class NexusProviderTest extends TestCase
 
         $this->assertEquals('https', $request->getUri()->getScheme());
         $this->assertEquals('example.com', $request->getUri()->getHost());
-        $this->assertEquals('/my-repository/packages/upload/my-package/2.1.0', $request->getUri()->getPath());
+        $this->assertEquals(
+            '/my-repository/packages/upload/my-package/2.1.0',
+            $request->getUri()->getPath(),
+        );
         $this->assertEquals('PUT', $request->getMethod());
 
-        $this->assertEquals('Basic ' . base64_encode('admin:my-password'), $request->getHeader('Authorization')[0]);
+        $this->assertEquals(
+            'Basic ' . base64_encode('admin:my-password'),
+            $request->getHeader('Authorization')[0],
+        );
 
-        $this->assertEquals('Simple test file to push.', $request->getBody()->getContents());
+        $this->assertEquals(
+            'Simple test file to push.',
+            $request->getBody()->getContents(),
+        );
     }
 
     /**
@@ -131,16 +165,18 @@ class NexusProviderTest extends TestCase
         $ioMock->method('hasAuthentication')->willReturn(true);
         $ioMock->method('getAuthentication')->willReturn([
             'username' => 'admin',
-            'password' => 'my-password'
+            'password' => 'my-password',
         ]);
 
-        $mock = new MockHandler([
-            new Response(200)
-        ]);
+        $mock = new MockHandler([new Response(200)]);
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
 
-        $nexusProvider = new NexusProvider($configurationMock, $ioMock, $client);
+        $nexusProvider = new NexusProvider(
+            $configurationMock,
+            $ioMock,
+            $client,
+        );
 
         $nexusProvider->sendFile($this->getFilePath());
 
@@ -148,12 +184,21 @@ class NexusProviderTest extends TestCase
 
         $this->assertEquals('https', $request->getUri()->getScheme());
         $this->assertEquals('example.com', $request->getUri()->getHost());
-        $this->assertEquals('/my-repository/packages/upload/my-package/2.1.0', $request->getUri()->getPath());
+        $this->assertEquals(
+            '/my-repository/packages/upload/my-package/2.1.0',
+            $request->getUri()->getPath(),
+        );
         $this->assertEquals('PUT', $request->getMethod());
 
-        $this->assertEquals('Basic ' . base64_encode('admin:my-password'), $request->getHeader('Authorization')[0]);
+        $this->assertEquals(
+            'Basic ' . base64_encode('admin:my-password'),
+            $request->getHeader('Authorization')[0],
+        );
 
-        $this->assertEquals('Simple test file to push.', $request->getBody()->getContents());
+        $this->assertEquals(
+            'Simple test file to push.',
+            $request->getBody()->getContents(),
+        );
     }
 
     /**
@@ -163,24 +208,28 @@ class NexusProviderTest extends TestCase
     {
         $configurationMock = $this->createBaseConfigurationMock();
 
-        $configurationMock->method('get')->willReturnCallback(function($parameter) {
-            switch($parameter) {
-                case 'username':
-                    return '';
-                case 'password':
-                    return '';
-                case 'access-token':
-                    return '';
-            }
-        });
+        $configurationMock
+            ->method('get')
+            ->willReturnCallback(function ($parameter) {
+                switch ($parameter) {
+                    case 'username':
+                        return '';
+                    case 'password':
+                        return '';
+                    case 'access-token':
+                        return '';
+                }
+            });
 
-        $mock = new MockHandler([
-            new Response(200)
-        ]);
+        $mock = new MockHandler([new Response(200)]);
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
 
-        $nexusProvider = new NexusProvider($configurationMock, new NullIO(), $client);
+        $nexusProvider = new NexusProvider(
+            $configurationMock,
+            new NullIO(),
+            $client,
+        );
 
         $nexusProvider->sendFile($this->getFilePath());
 
@@ -188,12 +237,18 @@ class NexusProviderTest extends TestCase
 
         $this->assertEquals('https', $request->getUri()->getScheme());
         $this->assertEquals('example.com', $request->getUri()->getHost());
-        $this->assertEquals('/my-repository/packages/upload/my-package/2.1.0', $request->getUri()->getPath());
+        $this->assertEquals(
+            '/my-repository/packages/upload/my-package/2.1.0',
+            $request->getUri()->getPath(),
+        );
         $this->assertEquals('PUT', $request->getMethod());
 
         $this->assertEmpty($request->getHeader('Authorization')); // Fallback to "none" authentication
 
-        $this->assertEquals('Simple test file to push.', $request->getBody()->getContents());
+        $this->assertEquals(
+            'Simple test file to push.',
+            $request->getBody()->getContents(),
+        );
     }
 
     /**
@@ -203,22 +258,26 @@ class NexusProviderTest extends TestCase
     {
         $configurationMock = $this->createBaseConfigurationMock();
 
-        $configurationMock->method('get')->willReturnCallback(function($parameter) {
-            switch($parameter) {
-                case 'username':
-                    return 'admin';
-                case 'password':
-                    return 'my-password';
-            }
-        });
+        $configurationMock
+            ->method('get')
+            ->willReturnCallback(function ($parameter) {
+                switch ($parameter) {
+                    case 'username':
+                        return 'admin';
+                    case 'password':
+                        return 'my-password';
+                }
+            });
 
-        $mock = new MockHandler([
-            new Response(401)
-        ]);
+        $mock = new MockHandler([new Response(401)]);
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
 
-        $nexusProvider = new NexusProvider($configurationMock, new NullIO(), $client);
+        $nexusProvider = new NexusProvider(
+            $configurationMock,
+            new NullIO(),
+            $client,
+        );
 
         $this->expectException(\Exception::class);
         $nexusProvider->sendFile($this->getFilePath());
@@ -233,13 +292,15 @@ class NexusProviderTest extends TestCase
         $ioMock = $this->createMock(IOInterface::class);
         $configurationMock->method('getAccessToken')->willReturn('my-token');
 
-        $mock = new MockHandler([
-            new Response(200)
-        ]);
+        $mock = new MockHandler([new Response(200)]);
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
 
-        $nexusProvider = new NexusProvider($configurationMock, $ioMock, $client);
+        $nexusProvider = new NexusProvider(
+            $configurationMock,
+            $ioMock,
+            $client,
+        );
 
         $nexusProvider->sendFile($this->getFilePath());
 
@@ -247,21 +308,33 @@ class NexusProviderTest extends TestCase
 
         $this->assertEquals('https', $request->getUri()->getScheme());
         $this->assertEquals('example.com', $request->getUri()->getHost());
-        $this->assertEquals('/my-repository/packages/upload/my-package/2.1.0', $request->getUri()->getPath());
+        $this->assertEquals(
+            '/my-repository/packages/upload/my-package/2.1.0',
+            $request->getUri()->getPath(),
+        );
         $this->assertEquals('PUT', $request->getMethod());
 
-        $this->assertEquals('Bearer my-token', $request->getHeader('Authorization')[0]);
+        $this->assertEquals(
+            'Bearer my-token',
+            $request->getHeader('Authorization')[0],
+        );
 
-        $this->assertEquals('Simple test file to push.', $request->getBody()->getContents());
+        $this->assertEquals(
+            'Simple test file to push.',
+            $request->getBody()->getContents(),
+        );
     }
 
     /**
      * Create a base configuration mock
      * @return Configuration|\PHPUnit\Framework\MockObject\MockObject
      */
-    private function createBaseConfigurationMock() {
+    private function createBaseConfigurationMock()
+    {
         $configurationMock = $this->createMock(Configuration::class);
-        $configurationMock->method('getUrl')->willReturn('https://example.com/my-repository/');
+        $configurationMock
+            ->method('getUrl')
+            ->willReturn('https://example.com/my-repository/');
         $configurationMock->method('getPackageName')->willReturn('my-package');
         $configurationMock->method('getVersion')->willReturn('2.1.0');
 
@@ -272,7 +345,8 @@ class NexusProviderTest extends TestCase
      * Return the test file path
      * @return string
      */
-    private function getFilePath() {
+    private function getFilePath()
+    {
         return __DIR__ . '/testFile.txt';
     }
 }

@@ -2,12 +2,14 @@
 
 namespace Elendev\ComposerPush\RepositoryProvider;
 
+use Composer\IO\ConsoleIO;
+
 class ArtifactoryProvider extends AbstractProvider
 {
     /**
-     * @return string URL to the repository
+     * {@inheritDoc}
      */
-    public function getUrl()
+    public function getUrl(): string
     {
         $url = $this->getConfiguration()->getUrl();
         $name = $this->getConfiguration()->getPackageName();
@@ -17,11 +19,15 @@ class ArtifactoryProvider extends AbstractProvider
         $moduleName = end($nameArray);
 
         if (empty($url)) {
-            throw new \InvalidArgumentException('The option --url is required or has to be provided as an extra argument in composer.json');
+            throw new \InvalidArgumentException(
+                'The option --url is required or has to be provided as an extra argument in composer.json',
+            );
         }
 
         if (empty($version)) {
-            throw new \InvalidArgumentException('The version argument is required');
+            throw new \InvalidArgumentException(
+                'The version argument is required',
+            );
         }
 
         // Remove trailing slash from URL
@@ -31,16 +37,25 @@ class ArtifactoryProvider extends AbstractProvider
     }
 
     /**
-     * Process the API call
-     * @param $file file to upload
-     * @param $options http call options
+     * {@inheritDoc}
      */
-    protected function apiCall($file, $options)
+    protected function apiCall(string $file, array $options): void
     {
-        $options['debug'] = $this->getIO()->isVeryVerbose();
+        $io = $this->getIO();
+        $options['debug'] = $io->isVeryVerbose();
         $options['body'] = fopen($file, 'r');
-        $options['progress'] = $this->getProgressCallback();
-        $url = $this->getUrl() . '.' . pathinfo($file, PATHINFO_EXTENSION) . '?properties=composer.version=' . $this->getConfiguration()->getVersion();
+        if ($io instanceof ConsoleIO) {
+            $options['progress'] = static::progressBarCallback(
+                $io->getProgressBar(),
+            );
+        }
+
+        $url =
+            $this->getUrl() .
+            '.' .
+            pathinfo($file, PATHINFO_EXTENSION) .
+            '?properties=composer.version=' .
+            $this->getConfiguration()->getVersion();
         $this->getClient()->request('PUT', $url, $options);
     }
 }
