@@ -4,7 +4,7 @@ on:
     pull_request:
 
 concurrency:
-    group: ${{ github.ref }}
+    group: reporting-${{ github.ref }}
     cancel-in-progress: true
 
 jobs:
