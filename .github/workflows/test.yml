@@ -1,5 +1,10 @@
-name: Testing and Code Quality
-on: [pull_request]
+name: Testing
+on:
+    workflow_dispatch:
+    pull_request:
+    push:
+        branches:
+            - master
 
 jobs:
     lint:
