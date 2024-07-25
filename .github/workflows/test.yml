@@ -51,4 +51,4 @@ jobs:
             - run: composer test >> "${GITHUB_STEP_SUMMARY}"
             - uses: clearlyip/code-coverage-report-action@v5
               with:
-                  filename: 'app/output/coverage/cov.xml'
+                  filename: 'output/coverage/cov.xml'
