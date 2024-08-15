@@ -59,7 +59,7 @@ class ZipArchiverTest extends TestCase
         $this->assertArchiveContainsFiles($this->generationPath, $expectedResult);
     }
 
-    public function zipArchiverProvider() {
+    public static function zipArchiverProvider() {
         return [
             [
                 __DIR__ . '/ZipArchiverTest/TypicalArchive',
@@ -123,7 +123,7 @@ class ZipArchiverTest extends TestCase
         $this->assertComposerJsonVersion($this->generationPath, $subdirectory, $version);
     }
 
-    public function composerArchiverProvider() {
+    public static function composerArchiverProvider() {
         return [
             [
                 __DIR__ . '/ZipArchiverTest/ComposerJsonArchive',
