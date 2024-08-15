@@ -303,13 +303,13 @@ class Configuration
             }
         } else {
             // configurations in composer.json support upload to multi repository
-            foreach ($extras[$extrasConfigurationKey] as $key=> $nexusPushConfigItem) {
+            foreach ($extras[$extrasConfigurationKey] as $key => $nexusPushConfigItem) {
                 if (empty($nexusPushConfigItem[self::PUSH_CFG_NAME])) {
                     $fmt = 'The push configuration array in composer.json with index {%s} need provide value for key "%s"';
                     $exceptionMsg = sprintf($fmt, $key, self::PUSH_CFG_NAME);
                     throw new InvalidConfigException($exceptionMsg);
                 }
-                if ($nexusPushConfigItem[self::PUSH_CFG_NAME] ==$repository) {
+                if ($nexusPushConfigItem[self::PUSH_CFG_NAME] == $repository) {
                     return $nexusPushConfigItem;
                 }
             }

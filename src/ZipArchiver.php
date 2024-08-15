@@ -128,7 +128,7 @@ class ZipArchiver
 
         $archive->deleteName($filePath);
 
-        $archive->addFromString($filePath, json_encode($content, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+        $archive->addFromString($filePath, json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         $archive->close();
     }
