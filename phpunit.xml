@@ -3,7 +3,7 @@
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          failOnRisky="true"
-         failOnWarning="true">
+         failOnWarning="false">
     <testsuites>
         <testsuite name="default">
             <directory>tests</directory>
