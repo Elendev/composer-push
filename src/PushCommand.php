@@ -132,6 +132,7 @@ EOT
                 $this->configuration->getVersion(),
                 $subdirectory,
                 $ignoredDirectories,
+                $input->getOption('keep-dot-files'),
                 $this->getIO()
             );
 
