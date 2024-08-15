@@ -2,5 +2,3 @@
 /**
  * Empty file
  */
-
-class myOtherFileTest {}
