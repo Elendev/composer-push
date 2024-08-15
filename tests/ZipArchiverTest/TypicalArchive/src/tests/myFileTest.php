@@ -2,3 +2,4 @@
 /**
  * Empty file
  */
+class myFileTest {}

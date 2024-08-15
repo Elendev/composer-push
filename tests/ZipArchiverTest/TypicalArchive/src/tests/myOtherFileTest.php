@@ -2,3 +2,5 @@
 /**
  * Empty file
  */
+
+class myOtherFileTest {}
