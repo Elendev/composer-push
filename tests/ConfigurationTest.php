@@ -5,7 +5,6 @@ namespace Elendev\ComposerPush;
 use Composer\Composer;
 use Composer\IO\NullIO;
 use Composer\Package\RootPackageInterface;
-use Composer\PartialComposer;
 use Composer\Plugin\PluginManager;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
@@ -440,7 +439,10 @@ class ConfigurationTest extends TestCase
         });
 
         $pluginManager = $this->createMock(PluginManager::class);
-        $globalComposer = $this->createMock(PartialComposer::class);
+        // PartialComposer is returned for 2.3.0+ composer
+        $globalComposer = class_exists('Composer\PartialComposer')
+            ? $this->createMock('Composer\PartialComposer')
+            : $this->createMock('Composer\Composer');
         $globalPackageInterface = $this->createMock(RootPackageInterface::class);
 
         $composer->method('getPluginManager')->willReturn($pluginManager);
