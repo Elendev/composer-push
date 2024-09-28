@@ -338,7 +338,7 @@ class Configuration
 
         foreach ($extras as $key => $repository) {
             if (empty($repository[self::PUSH_CFG_NAME])) {
-                $fmt = 'The push configuration array in composer.json with index {%s} need provide value for key "%s"';
+                $fmt = 'The push configuration array in composer.json with index {%s} needs to provide the value for key "%s"';
                 $exceptionMsg = sprintf($fmt, $key, self::PUSH_CFG_NAME);
                 throw new InvalidConfigException($exceptionMsg);
             }
