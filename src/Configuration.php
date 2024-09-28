@@ -279,58 +279,74 @@ class Configuration
 
     /**
      * @param InputInterface $input
+     * @param Composer       $composer
+     *
+     * @return array
+     * @throws \InvalidArgumentException|InvalidConfigException
      */
     private function parseNexusExtra(InputInterface $input, Composer $composer)
     {
-        $this->checkNexusPushValid($input, $composer);
+        $globalComposer = $composer->getPluginManager()->getGlobalComposer();
+        $globalExtras = !empty($globalComposer) ? $globalComposer->getPackage()->getExtra() : null;
+        $localExtras = $composer->getPackage()->getExtra();
 
-        $repository = $input->getOption(PushCommand::REPOSITORY);
-        $extras = $composer->getPackage()->getExtra();
-
-        $extrasConfigurationKey = 'push';
-
-        if (empty($extras['push'])) {
-            if (!empty($extras['nexus-push'])) {
-                $extrasConfigurationKey = 'nexus-push';
+        $localExtrasConfigurationKey = 'push';
+        if (empty($localExtras['push'])) {
+            if (!empty($localExtras['nexus-push'])) {
+                $localExtrasConfigurationKey = 'nexus-push';
                 $this->io->warning('Configuration under extra - nexus-push in composer.json is deprecated, please replace it by extra - push');
             }
         }
 
-        if (empty($repository)) {
-            // configurations in composer.json support Only upload to unique repository
-            if (!empty($extras[$extrasConfigurationKey])) {
-                return $extras[$extrasConfigurationKey];
-            }
-        } else {
-            // configurations in composer.json support upload to multi repository
-            foreach ($extras[$extrasConfigurationKey] as $key => $nexusPushConfigItem) {
-                if (empty($nexusPushConfigItem[self::PUSH_CFG_NAME])) {
-                    $fmt = 'The push configuration array in composer.json with index {%s} need provide value for key "%s"';
-                    $exceptionMsg = sprintf($fmt, $key, self::PUSH_CFG_NAME);
-                    throw new InvalidConfigException($exceptionMsg);
-                }
-                if ($nexusPushConfigItem[self::PUSH_CFG_NAME] == $repository) {
-                    return $nexusPushConfigItem;
-                }
-            }
+        $globalConfig = !empty($globalExtras['push']) ? $globalExtras['push'] : null;
+        $localConfig = !empty($localExtras[$localExtrasConfigurationKey]) ? $localExtras[$localExtrasConfigurationKey] : null;
 
-            if (empty($this->nexusPushConfig)) {
-                throw new \InvalidArgumentException('The value of option --repository match no push configuration, please check');
-            }
-        }
-
-        return [];
-    }
-
-    private function checkNexusPushValid(InputInterface $input, Composer $composer)
-    {
         $repository = $input->getOption(PushCommand::REPOSITORY);
-        $extras = $composer->getPackage()->getExtra();
-        if (empty($repository) && (!empty($extras['push'][0]) || !empty($extras['nexus-push'][0]))) {
+        if (empty($repository) && !empty($localConfig[0])) {
             throw new \InvalidArgumentException('As configurations in composer.json support upload to multi repository, the option --repository is required');
         }
-        if (!empty($repository) && empty($extras['push'][0]) && empty($extras['nexus-push'][0])) {
+        if (!empty($repository) && empty($globalConfig[0]) && empty($localConfig[0])) {
             throw new InvalidConfigException('the option --repository is offered, but configurations in composer.json doesn\'t support upload to multi repository, please check');
         }
+
+        if (!empty($repository)) {
+            $globalRepository = $this->getRepositoryConfig($globalConfig, $repository);
+            $localRepository = $this->getRepositoryConfig($localConfig, $repository);
+
+            if (empty($globalRepository) && empty($localRepository)) {
+                throw new \InvalidArgumentException('The value of option --repository match no push configuration, please check');
+            }
+
+            return array_replace($globalRepository ?? [], $localRepository ?? []);
+        }
+
+        return array_replace($globalConfig ?? [], $localConfig ?? []);
+    }
+
+    /**
+     * @param mixed  $extras
+     * @param string $name
+     *
+     * @return mixed|null
+     * @throws InvalidConfigException
+     */
+    private function getRepositoryConfig($extras, $name)
+    {
+        if (empty($extras[0])) {
+            return null;
+        }
+
+        foreach ($extras as $key => $repository) {
+            if (empty($repository[self::PUSH_CFG_NAME])) {
+                $fmt = 'The push configuration array in composer.json with index {%s} needs to provide the value for key "%s"';
+                $exceptionMsg = sprintf($fmt, $key, self::PUSH_CFG_NAME);
+                throw new InvalidConfigException($exceptionMsg);
+            }
+            if ($repository[self::PUSH_CFG_NAME] === $name) {
+                return $repository;
+            }
+        }
+
+        return null;
     }
 }
