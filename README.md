@@ -106,6 +106,21 @@ The new version continues to support parsing the unique repository configuration
 
 The `username` and `password` can be specified in the `auth.json` file on a per-user basis with the [authentication mechanism provided by Composer](https://getcomposer.org/doc/articles/http-basic-authentication.md).
 
+### Global configuration
+It's also possible to add some configuration inside global `composer.json` located at composer home (`composer config -g home`).
+
+Following precedence order will be used for each key:
+- command-line parameter
+- local `composer.json`
+- global `composer.json`
+- default
+
+Array values will not be merged.
+
+The command-line parameter -- repository is required if local configuration is multi repository. Global unique repository configuration will be ignored in that case.
+
+Multi repository configuration will be merged by the `name` key.
+
 ## Providers
 Specificity for some of the providers.
 

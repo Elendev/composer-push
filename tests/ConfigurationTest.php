@@ -5,6 +5,7 @@ namespace Elendev\ComposerPush;
 use Composer\Composer;
 use Composer\IO\NullIO;
 use Composer\Package\RootPackageInterface;
+use Composer\Plugin\PluginManager;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputInterface;
@@ -36,7 +37,9 @@ class ConfigurationTest extends TestCase
     private $configIgnoreByComposer;
     private $configOptionUrl;
 
-    private $singleConfig;
+    private $localConfig;
+    private $globalConfig;
+    private $splitConfig;
     private $repository;
 
     private $configType;
@@ -44,6 +47,10 @@ class ConfigurationTest extends TestCase
 
     private $configVerifySsl;
     private $extraVerifySsl;
+
+    private const ComposerConfigEmpty = 0;
+    private const ComposerConfigSingle = 1;
+    private const ComposerConfigMulti = 2;
 
     public function setUp(): void
     {
@@ -53,7 +60,8 @@ class ConfigurationTest extends TestCase
         $this->configIgnoreByComposer = null;
         $this->configOptionUrl = "https://option-url.com";
 
-        $this->singleConfig = true;
+        $this->localConfig = self::ComposerConfigSingle;
+        $this->globalConfig = self::ComposerConfigEmpty;
         $this->configName = null;
 
         $this->configType = null;
@@ -145,7 +153,7 @@ class ConfigurationTest extends TestCase
         $this->assertEquals('push-username', $this->configuration->get('username'));
         $this->assertEquals('push-password', $this->configuration->get('password'));
 
-        $this->singleConfig = false;
+        $this->localConfig = self::ComposerConfigMulti;
         $this->repository = 'A';
 
         $this->initGlobalConfiguration();
@@ -256,6 +264,85 @@ class ConfigurationTest extends TestCase
         $this->assertEquals("my-username", $this->configuration->getOptionUsername());
     }
 
+    public function testGetGlobalConfig()
+    {
+        $this->configIgnore = ['dir1', 'dir2'];
+
+        $this->splitConfig = true;
+        $this->localConfig = self::ComposerConfigSingle;
+        $this->globalConfig = self::ComposerConfigSingle;
+        $this->repository = null;
+
+        $this->initGlobalConfiguration();
+        $this->assertEquals('https://global.example.com', $this->configuration->get('url'));
+        $this->assertArrayEquals($this->configIgnore, $this->configuration->get('ignore'));
+
+        $this->splitConfig = false;
+        $this->localConfig = self::ComposerConfigSingle;
+        $this->globalConfig = self::ComposerConfigMulti;
+        $this->repository = null;
+
+        $this->initGlobalConfiguration();
+        $this->assertEquals('https://example.com', $this->configuration->get('url'));
+
+        $this->repository = 'A';
+
+        $this->initGlobalConfiguration();
+        $this->assertEquals('https://global.a.com', $this->configuration->get('url'));
+
+        $this->repository = 'B';
+
+        $this->initGlobalConfiguration();
+        $this->assertEquals('https://global.b.com', $this->configuration->get('url'));
+
+        $this->localConfig = self::ComposerConfigMulti;
+        $this->globalConfig = self::ComposerConfigSingle;
+        $this->repository = null;
+
+        $this->initGlobalConfiguration();
+        $this->expectException(\InvalidArgumentException::class);
+        $this->configuration->get('url');
+
+        $this->localConfig = self::ComposerConfigMulti;
+        $this->globalConfig = self::ComposerConfigMulti;
+        $this->repository = 'A';
+
+        $this->initGlobalConfiguration();
+        $this->assertEquals('https://a.com', $this->configuration->get('url'));
+        $this->assertEquals('global-push-username-a', $this->configuration->get('username'));
+
+        $this->repository = 'B';
+
+        $this->initGlobalConfiguration();
+        $this->assertEquals('https://b.com', $this->configuration->get('url'));
+        $this->assertEquals('global-push-username-b', $this->configuration->get('username'));
+
+
+        $this->splitConfig = false;
+
+        $this->localConfig = self::ComposerConfigEmpty;
+        $this->globalConfig = self::ComposerConfigSingle;
+        $this->repository = null;
+
+        $this->initGlobalConfiguration();
+        $this->assertEquals('https://global.example.com', $this->configuration->get('url'));
+        $this->assertEquals(null, $this->configuration->get('ignore'));
+
+        $this->localConfig = self::ComposerConfigEmpty;
+        $this->globalConfig = self::ComposerConfigMulti;
+        $this->repository = 'A';
+
+        $this->initGlobalConfiguration();
+        $this->assertEquals('https://global.a.com', $this->configuration->get('url'));
+        $this->assertEquals('global-push-username-a', $this->configuration->get('username'));
+
+        $this->repository = 'B';
+
+        $this->initGlobalConfiguration();
+        $this->assertEquals('https://global.b.com', $this->configuration->get('url'));
+        $this->assertEquals('global-push-username-b', $this->configuration->get('username'));
+    }
+
     private function createInputMock()
     {
         $input = $this->createMock(InputInterface::class);
@@ -311,36 +398,96 @@ class ConfigurationTest extends TestCase
 
         $packageInterface->method('getVersion')->willReturn('1.2.3');
         $packageInterface->method('getExtra')->willReturnCallback(function() {
-            if ($this->singleConfig) {
-                return [
-                    'push' => [
-                        'url' => 'https://example.com',
-                        "username" => "push-username",
-                        "password" => "push-password",
-                        "ignore" => $this->configIgnore,
-                        "type" => $this->extraConfigType,
-                        "ssl-verify" => $this->extraVerifySsl,
-                    ]
-                ];
-            } else {
-                return [
-                    'push' => [
-                        [
-                            'name' => 'A',
-                            'url' => 'https://a.com',
-                            "username" => "push-username-a",
-                            "password" => "push-password-a",
-                        ],
-                        [
-                            'name' => 'B',
-                            'url' => 'https://b.com',
-                            "username" => "push-username-b",
-                            "password" => "push-password-b",
-                        ]
-                    ]
-                ];
+            switch ($this->localConfig) {
+                case self::ComposerConfigSingle:
+                    return [
+                        'push' => array_replace([
+                            "ignore" => $this->configIgnore,
+                        ], (!$this->splitConfig) ? [
+                            'url' => 'https://example.com',
+                            "username" => "push-username",
+                            "password" => "push-password",
+                            "type" => $this->extraConfigType,
+                            "ssl-verify" => $this->extraVerifySsl,
+                        ] : [])
+                    ];
+                case self::ComposerConfigMulti:
+                    return [
+                        'push' => array_replace_recursive([
+                            [
+                                'name' => 'A',
+                                'url' => 'https://a.com',
+                            ],
+                            [
+                                'name' => 'B',
+                                'url' => 'https://b.com',
+                            ]
+                        ], (!$this->splitConfig) ? [
+                            [
+                                "username" => "push-username-a",
+                                "password" => "push-password-a",
+                            ],
+                            [
+                                "username" => "push-username-b",
+                                "password" => "push-password-b",
+                            ]
+                        ] : [])
+                    ];
+                default:
+                    return [];
             }
+        });
 
+        $pluginManager = $this->createMock(PluginManager::class);
+        // PartialComposer is returned for 2.3.0+ composer
+        $globalComposer = class_exists('Composer\PartialComposer')
+            ? $this->createMock('Composer\PartialComposer')
+            : $this->createMock('Composer\Composer');
+        $globalPackageInterface = $this->createMock(RootPackageInterface::class);
+
+        $composer->method('getPluginManager')->willReturn($pluginManager);
+        $pluginManager->method('getGlobalComposer')->willReturn($globalComposer);
+        $globalComposer->method('getPackage')->willReturn($globalPackageInterface);
+
+        $globalPackageInterface->method('getExtra')->willReturnCallback(function () {
+            switch ($this->globalConfig) {
+                case self::ComposerConfigSingle:
+                    return [
+                        'push' => array_replace([
+                            'url' => 'https://global.example.com',
+                            "username" => "global-push-username",
+                            "password" => "global-push-password",
+                            "type" => $this->extraConfigType,
+                            "ssl-verify" => $this->extraVerifySsl,
+                        ], (!$this->splitConfig) ? [
+                            "ignore" => $this->configIgnore,
+                        ] : [])
+                    ];
+                case self::ComposerConfigMulti:
+                    return [
+                        'push' => array_replace_recursive([
+                            [
+                                'name' => 'B',
+                                "username" => "global-push-username-b",
+                                "password" => "global-push-password-b",
+                            ],
+                            [
+                                'name' => 'A',
+                                "username" => "global-push-username-a",
+                                "password" => "global-push-password-a",
+                            ]
+                        ], (!$this->splitConfig) ? [
+                            [
+                                'url' => 'https://global.b.com',
+                            ],
+                            [
+                                'url' => 'https://global.a.com',
+                            ]
+                        ] : [])
+                    ];
+                default:
+                    return [];
+            }
         });
 
         $packageInterface->method('getArchiveExcludes')->willReturnCallback(function() {
